@@ -23,7 +23,7 @@ async def cmd_help(message: Message):
         "📝 <b>Справка</b>\n\n"
         "/add - добавить новую запись\n"
         "/list - показать все записи (с индексами)\n"
-        "/del <index> - удалить запись по индексу\n\n"
+        "/del <code>1</code> - удалить запись по индексу\n\n"
         "Пример: /del 1",
         parse_mode="HTML"
     )
