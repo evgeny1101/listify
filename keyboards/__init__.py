@@ -1,3 +1,3 @@
-from .confirm import delete_confirm
+from .confirm import get_delete_confirm_keyboard
 
-__all__ = ["delete_confirm"]
+__all__ = ["get_delete_confirm_keyboard"]

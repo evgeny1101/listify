@@ -1,10 +1,16 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-delete_confirm = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(text="Да, удалить", callback_data="confirm_delete"),
-            InlineKeyboardButton(text="Отмена", callback_data="cancel_delete"),
+
+def get_delete_confirm_keyboard(index: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Да, удалить", callback_data=f"confirm_delete:{index}"
+                ),
+                InlineKeyboardButton(
+                    text="Отмена", callback_data=f"cancel_delete:{index}"
+                ),
+            ]
         ]
-    ]
-)
+    )
