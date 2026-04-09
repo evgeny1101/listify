@@ -13,8 +13,16 @@ class AddNote(StatesGroup):
 
 @router.message(Command("add"))
 async def cmd_add(message: Message, state: FSMContext):
-    await message.answer("Введите текст заметки:")
-    await state.set_state(AddNote.waiting_for_text)
+    parts = message.text.split(maxsplit=1)
+    text = parts[1].strip() if len(parts) > 1 else ""
+
+    if text:
+        from database import add_note
+        await add_note(text)
+        await message.answer("✅ Запись добавлена")
+    else:
+        await message.answer("Введите текст заметки:")
+        await state.set_state(AddNote.waiting_for_text)
 
 
 @router.message(AddNote.waiting_for_text)
