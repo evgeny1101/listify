@@ -1,4 +1,5 @@
 from .run import dp, bot
+from .logging_config import logger
 
 
 async def main():
@@ -15,5 +16,5 @@ async def main():
     from database import init_db
     await init_db()
     
-    print("Bot started...")
+    logger.info("Bot started...")
     await dp.start_polling(bot)
