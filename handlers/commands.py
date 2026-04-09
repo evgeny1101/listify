@@ -25,5 +25,5 @@ async def cmd_help(message: Message):
         "/list - показать все записи (с индексами)\n"
         "/del <code>1</code> - удалить запись по индексу\n\n"
         "Пример: /del 1",
-        parse_mode="HTML"
+        parse_mode="HTML",
     )

@@ -19,7 +19,7 @@ async def add_note(text: str) -> int:
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute(
             "INSERT INTO notes (text, created_at) VALUES (?, ?)",
-            (text, datetime.now().isoformat())
+            (text, datetime.now().isoformat()),
         )
         await db.commit()
         return cursor.lastrowid
@@ -28,7 +28,9 @@ async def add_note(text: str) -> int:
 async def get_notes() -> list[Note]:
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
-        async with db.execute("SELECT id, text, created_at FROM notes ORDER BY id") as cursor:
+        async with db.execute(
+            "SELECT id, text, created_at FROM notes ORDER BY id"
+        ) as cursor:
             rows = await cursor.fetchall()
             return [Note(row["id"], row["text"], row["created_at"]) for row in rows]
 
