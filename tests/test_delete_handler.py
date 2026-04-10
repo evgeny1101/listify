@@ -30,6 +30,26 @@ class TestParseIds:
 
         assert result == [5]
 
+    def test_parse_ids_range(self):
+        result = parse_ids("1-3")
+
+        assert result == [1, 2, 3]
+
+    def test_parse_ids_range_with_spaces(self):
+        result = parse_ids("1 - 3")
+
+        assert result == [1, 2, 3]
+
+    def test_parse_ids_range_reversed(self):
+        result = parse_ids("3-1")
+
+        assert result == [1, 2, 3]
+
+    def test_parse_ids_mixed(self):
+        result = parse_ids("1, 3-5, 7")
+
+        assert result == [1, 3, 4, 5, 7]
+
 
 class TestCmdDel:
     @pytest.mark.asyncio

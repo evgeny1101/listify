@@ -18,7 +18,19 @@ def parse_ids(text: str) -> list[int]:
     parsed = []
     for part in text.split(","):
         part = part.strip()
-        if part:
+        if not part:
+            continue
+        if "-" in part:
+            range_parts = [p.strip() for p in part.split("-") if p.strip()]
+            if len(range_parts) == 2:
+                try:
+                    start, end = int(range_parts[0]), int(range_parts[1])
+                    if start > end:
+                        start, end = end, start
+                    parsed.extend(range(start, end + 1))
+                except ValueError:
+                    pass
+        else:
             try:
                 parsed.append(int(part))
             except ValueError:
@@ -55,7 +67,7 @@ async def cmd_del(message: Message, state: FSMContext):
 
     if not args:
         await send_notes_in_chunks(message, notes, format_note_short)
-        text = "\nВведите ID (можно несколько через запятую). Пример: 1, 2, 3"
+        text = "\nВведите ID (можно несколько через запятую или диапазон). Пример: 1, 2-3, 5"
         await message.answer(text)
         await state.set_state(DeleteNote.waiting_for_ids)
         return
@@ -63,7 +75,9 @@ async def cmd_del(message: Message, state: FSMContext):
     ids = parse_ids(args)
 
     if not ids:
-        await message.answer("ID должны быть числами.\nПример: /del 1, 2, 3")
+        await message.answer(
+            "ID должны быть числами или диапазоном.\nПример: /del 1, 2-3, 5"
+        )
         return
 
     await show_delete_confirm(message, ids, state)
@@ -91,7 +105,9 @@ async def on_ids_input(message: Message, state: FSMContext):
     ids = parse_ids(text)
 
     if not ids:
-        await message.answer("ID должны быть числами через запятую. Пример: 1, 2, 3")
+        await message.answer(
+            "ID должны быть числами через запятую или диапазоном. Пример: 1, 2-3, 5"
+        )
         return
 
     await show_delete_confirm(message, ids, state)
