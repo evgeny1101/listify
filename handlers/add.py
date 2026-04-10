@@ -50,7 +50,7 @@ async def cmd_add(message: Message, state: FSMContext):
         await message.answer("⚠️ Поддерживаются только текст и изображения")
         return
 
-    parts = message.text.split(maxsplit=1)
+    parts = message.text.split(maxsplit=1) if message.text else ("",)
     args_text = parts[1].strip() if len(parts) > 1 else ""
 
     if message.photo:
