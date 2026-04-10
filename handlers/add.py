@@ -46,20 +46,20 @@ class AddNote(StatesGroup):
 
 @router.message(Command("add"))
 async def cmd_add(message: Message, state: FSMContext):
-    if message.photo:
-        await _process_photo(message, state, from_command=True)
-        return
-
     if has_unsupported_content(message):
         await message.answer("⚠️ Поддерживаются только текст и изображения")
         return
 
     parts = message.text.split(maxsplit=1)
-    text = parts[1].strip() if len(parts) > 1 else ""
+    args_text = parts[1].strip() if len(parts) > 1 else ""
 
-    if text:
-        text, truncated = truncate_text(text)
-        await add_note(text)
+    if message.photo:
+        await _process_photo(message, state, from_command=True, args_text=args_text)
+        return
+
+    if args_text:
+        args_text, truncated = truncate_text(args_text)
+        await add_note(args_text)
         if truncated:
             await message.answer("⚠️ Запись добавлена (обрезано до 200 символов)")
         else:
@@ -73,7 +73,7 @@ async def cmd_add(message: Message, state: FSMContext):
 
 
 async def _process_photo(
-    message: Message, state: FSMContext, from_command: bool = False
+    message: Message, state: FSMContext, from_command: bool = False, args_text: str = ""
 ):
     large_and_small = get_photo_file_ids(message)
 
@@ -88,7 +88,8 @@ async def _process_photo(
 
     small_id, large_id = large_and_small
     caption = message.caption.strip() if message.caption else ""
-    text, truncated = truncate_text(caption) if caption else ("", False)
+    text = args_text or caption
+    text, truncated = truncate_text(text) if text else ("", False)
 
     note_id = await add_note(text) if text else await add_note("📷 Изображение")
 
