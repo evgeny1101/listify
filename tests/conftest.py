@@ -1,7 +1,6 @@
 import pytest
 import pytest_asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
 
 
 @pytest.fixture
@@ -64,9 +63,21 @@ def mock_callback():
 @pytest.fixture
 def sample_notes():
     return [
-        type("Note", (), {"id": 1, "text": "First note", "created_at": "2024-01-01T10:00:00"})(),
-        type("Note", (), {"id": 2, "text": "Second note", "created_at": "2024-01-02T10:00:00"})(),
-        type("Note", (), {"id": 3, "text": "Third note", "created_at": "2024-01-03T10:00:00"})(),
+        type(
+            "Note",
+            (),
+            {"id": 1, "text": "First note", "created_at": "2024-01-01T10:00:00"},
+        )(),
+        type(
+            "Note",
+            (),
+            {"id": 2, "text": "Second note", "created_at": "2024-01-02T10:00:00"},
+        )(),
+        type(
+            "Note",
+            (),
+            {"id": 3, "text": "Third note", "created_at": "2024-01-03T10:00:00"},
+        )(),
     ]
 
 
