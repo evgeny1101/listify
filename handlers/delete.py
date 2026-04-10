@@ -57,7 +57,7 @@ def parse_ids(text: str) -> list[int] | None:
 async def show_delete_confirm(message: Message, ids: list[int], state: FSMContext):
     notes = await get_notes()
 
-    valid_ids = [i for i in ids if 1 <= i <= len(notes)]
+    valid_ids = list(dict.fromkeys([i for i in ids if 1 <= i <= len(notes)]))
 
     if not valid_ids:
         await message.answer("Неверные ID. Введите существующие номера записей.")
