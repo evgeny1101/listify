@@ -29,10 +29,12 @@ python main.py
 ## Разработка
 
 - Линтинг: использовать скил `/lint`
-- Тесты: `pytest` (42 теста, покрытие database, handlers, formatters)
-- Запуск тестов: `python -m pytest tests/ -v`
+- Тесты: использовать скил `/test` (42 теста, покрытие database, handlers, formatters)
+- При внесении изменений: сначала добавить/обновить тесты, затем запустить `/test`
+- Запуск тестов вручную: `python -m pytest tests/ -v`
 - Сброс БД: `rm listify.db`
 
 ## Скилы
 
 - `/lint` — запуск линтинга проекта
+- `/test` — запуск тестов проекта
