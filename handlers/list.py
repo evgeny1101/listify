@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 from aiogram import Router
-from aiogram.types import Message
 from aiogram.filters import Command
+from aiogram.types import Message
+
 from bot.formatters import send_note_with_image
-from database import get_notes, get_note_images
+from database import get_note_images, get_notes
 
 router = Router()
 

@@ -1,17 +1,18 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
 
 from handlers.add import (
-    truncate_text,
-    cmd_add,
-    add_note_content,
-    AddNote,
     MAX_NOTE_LENGTH,
+    AddNote,
+    _process_photo,
+    add_note_content,
+    cmd_add,
     get_photo_file_ids,
     has_unsupported_content,
-    _process_photo,
+    on_cancel_input,
+    truncate_text,
 )
-from handlers.add import on_cancel_input
 from keyboards.cancel import get_cancel_keyboard
 
 

@@ -1,7 +1,10 @@
+from datetime import datetime
+from typing import Literal
+
 import aiosqlite
+
 from config import DB_PATH
 from models.note import Note, NoteImage
-from datetime import datetime
 
 
 async def init_db():
@@ -75,7 +78,9 @@ async def delete_note(note_id: int) -> bool:
         return cursor.rowcount > 0
 
 
-async def add_note_image(note_id: int, size: str, file_id: str) -> None:
+async def add_note_image(
+    note_id: int, size: Literal["small", "large"], file_id: str
+) -> None:
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             "INSERT OR REPLACE INTO note_images (note_id, size, file_id) VALUES (?, ?, ?)",

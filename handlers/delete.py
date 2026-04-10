@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from database import get_notes, get_note_images, delete_note
+from aiogram.types import CallbackQuery, Message
+
+from database import delete_note, get_note_images, get_notes
 from keyboards import get_multi_delete_keyboard
 
 router = Router()
@@ -53,7 +56,7 @@ def parse_ids(text: str) -> list[int] | None:
     return parsed[:MAX_TOTAL]
 
 
-async def show_delete_confirm(message: Message, ids: list[int], state: FSMContext):
+async def show_delete_confirm(message: Message, ids: list[int], state: FSMContext) -> None:
     notes = await get_notes()
 
     valid_ids = list(dict.fromkeys([i for i in ids if 1 <= i <= len(notes)]))

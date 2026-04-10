@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import AsyncMock
+
+import pytest
+
 from bot.formatters import format_note_full, format_note_short, send_notes_in_chunks
 
 

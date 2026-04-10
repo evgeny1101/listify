@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Literal
 
 
 @dataclass
@@ -12,5 +13,5 @@ class Note:
 @dataclass
 class NoteImage:
     note_id: int
-    size: str
+    size: Literal["small", "large"]
     file_id: str

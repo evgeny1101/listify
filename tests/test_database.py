@@ -1,7 +1,8 @@
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from database.db import init_db, add_note, get_notes, delete_note
+import pytest
+
+from database.db import add_note, delete_note, get_notes, init_db
 
 
 class TestInitDb:

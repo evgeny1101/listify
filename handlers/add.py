@@ -1,8 +1,10 @@
-from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from __future__ import annotations
+
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import CallbackQuery, Message
 
 from database import add_note, add_note_image
 from keyboards import get_cancel_keyboard

@@ -1,4 +1,5 @@
 from contextvars import ContextVar
+
 from aiogram import BaseMiddleware
 from aiogram.types import Message
 

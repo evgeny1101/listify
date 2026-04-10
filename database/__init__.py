@@ -1,21 +1,21 @@
 from .db import (
-    init_db,
     add_note,
-    get_notes,
-    get_note,
-    delete_note,
     add_note_image,
-    get_note_images,
+    delete_note,
     delete_note_images,
+    get_note,
+    get_note_images,
+    get_notes,
+    init_db,
 )
 
 __all__ = [
-    "init_db",
     "add_note",
-    "get_notes",
-    "get_note",
-    "delete_note",
     "add_note_image",
-    "get_note_images",
+    "delete_note",
     "delete_note_images",
+    "get_note",
+    "get_note_images",
+    "get_notes",
+    "init_db",
 ]

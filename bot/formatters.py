@@ -1,5 +1,9 @@
-from aiogram.types import Message
+from __future__ import annotations
+
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.types import Message
+
+from models.note import Note, NoteImage
 
 NOTE_SEPARATOR = "═"
 NOTE_DELIMITER = "─"
@@ -19,7 +23,11 @@ def format_note_short(index: int, text: str, limit: int = 25) -> str:
     return f"{header}\n{truncated}\n{footer}"
 
 
-async def send_notes_in_chunks(message: Message, notes, format_func):
+async def send_notes_in_chunks(
+    message: Message,
+    notes: list[Note],
+    format_func: callable,
+) -> None:
     chunks = []
     current_chunk = ""
 
@@ -46,9 +54,9 @@ async def send_note_with_image(
     message: Message,
     index: int,
     text: str,
-    images: list,
+    images: list[NoteImage],
     use_large: bool = False,
-):
+) -> bool:
     header = f"📌 #{index} {NOTE_SEPARATOR * 3}"
     footer = NOTE_DELIMITER * len(header)
 
@@ -79,8 +87,8 @@ async def send_note_short_with_image(
     message: Message,
     index: int,
     text: str,
-    images: list,
-):
+    images: list[NoteImage],
+) -> bool:
     header = f"📌 #{index} {NOTE_SEPARATOR * 3}"
     footer = NOTE_DELIMITER * len(header)
     truncated = text[:25] + "..." if len(text) > 25 else text

@@ -1,7 +1,8 @@
-import pytest
 from unittest.mock import AsyncMock, patch
 
-from handlers.delete import parse_ids, cmd_del, on_ids_input, show_delete_confirm
+import pytest
+
+from handlers.delete import cmd_del, on_ids_input, parse_ids, show_delete_confirm
 
 
 class TestParseIds:
