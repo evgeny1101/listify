@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch, AsyncMock
 
 from handlers.add import truncate_text, cmd_add, add_note_text, AddNote, MAX_NOTE_LENGTH
 from handlers.add import on_cancel_input
@@ -103,16 +104,18 @@ class TestAddNoteText:
 
     @pytest.mark.asyncio
     async def test_add_note_text_intercepts_command_and_clears_state(
-        self, mock_message, mock_state, mock_add_note
+        self, mock_message, mock_state, mock_add_note, sample_notes
     ):
         mock_message.text = "/list"
 
-        await add_note_text(mock_message, mock_state)
+        with patch("handlers.list.get_notes", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = sample_notes
+            with patch("handlers.list.send_notes_in_chunks", new_callable=AsyncMock) as mock_send:
+                await add_note_text(mock_message, mock_state)
 
-        mock_add_note.assert_not_called()
-        mock_state.clear.assert_called_once()
-        call_args = mock_message.answer.call_args[0][0]
-        assert "прервана" in call_args
+                mock_add_note.assert_not_called()
+                mock_state.clear.assert_called_once()
+                mock_send.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_add_note_text_with_add_and_text_adds_note(

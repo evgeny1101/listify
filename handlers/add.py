@@ -51,10 +51,43 @@ async def add_note_text(message: Message, state: FSMContext):
 
         parts = text.split(maxsplit=1)
         command = parts[0]
+        args = parts[1].strip() if len(parts) > 1 else ""
 
-        if command == "/add" and len(parts) > 1 and parts[1].strip():
-            await add_note(parts[1].strip())
+        if command == "/add" and args:
+            await add_note(args)
             await message.answer("✅ Запись добавлена")
+            return
+
+        if command == "/del" and args:
+            from handlers.delete import parse_ids, show_delete_confirm
+
+            ids = parse_ids(args)
+            if ids:
+                await show_delete_confirm(message, ids, state)
+                return
+
+        if command == "/list":
+            from handlers.list import cmd_list
+
+            await cmd_list(message)
+            return
+
+        if command == "/start":
+            from handlers.commands import cmd_start
+
+            await cmd_start(message)
+            return
+
+        if command == "/help":
+            from handlers.commands import cmd_help
+
+            await cmd_help(message)
+            return
+
+        if command == "/del":
+            from handlers.delete import cmd_del
+
+            await cmd_del(message, state)
             return
 
         await message.answer("❌ Операция прервана. Введите команду заново.")
