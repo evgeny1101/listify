@@ -1,25 +1,53 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 
 router = Router()
 
 
-@router.message(Command("del"))
-async def cmd_del(message: Message):
-    args = message.text.split()[1:]
+class DeleteNote(StatesGroup):
+    waiting_for_ids = State()
 
-    if not args:
-        await message.answer("Укажите индекс записи.\nПример: /del 1")
-        return
 
-    try:
-        index = int(args[0])
-    except ValueError:
-        await message.answer("Индекс должен быть числом")
-        return
+def parse_ids(text: str) -> list[int]:
+    parsed = []
+    for part in text.split(","):
+        part = part.strip()
+        if part:
+            try:
+                parsed.append(int(part))
+            except ValueError:
+                pass
+    return parsed
 
+
+async def show_delete_confirm(message: Message, ids: list[int], state: FSMContext):
     from database import get_notes
+    from keyboards import get_multi_delete_keyboard
+
+    notes = await get_notes()
+
+    valid_ids = [i for i in ids if 1 <= i <= len(notes)]
+
+    if not valid_ids:
+        await message.answer("Неверные ID. Введите существующие номера записей.")
+        return
+
+    await state.update_data(ids=valid_ids)
+
+    text = "Удалить записи #" + ", ".join(map(str, valid_ids)) + "?"
+
+    await message.answer(text, reply_markup=get_multi_delete_keyboard(valid_ids))
+
+
+@router.message(Command("del"))
+async def cmd_del(message: Message, state: FSMContext):
+    from database import get_notes
+
+    parts = message.text.split(maxsplit=1)
+    args = parts[1].strip() if len(parts) > 1 else ""
 
     notes = await get_notes()
 
@@ -27,40 +55,63 @@ async def cmd_del(message: Message):
         await message.answer("Записей нет")
         return
 
-    if index < 1 or index > len(notes):
-        await message.answer(f"Неверный индекс. Введите от 1 до {len(notes)}")
+    if not args:
+        text = "📝 <b>Ваши записи:</b>\n\n"
+        for i, note in enumerate(notes, 1):
+            text += f"{i}. {note.text}\n"
+
+        text += "\nВведите ID (можно несколько через запятую). Пример: 1, 2, 3"
+
+        await message.answer(text, parse_mode="HTML")
+        await state.set_state(DeleteNote.waiting_for_ids)
         return
 
-    from keyboards import get_delete_confirm_keyboard
+    ids = parse_ids(args)
 
-    await message.answer(
-        f"Удалить заметку #{index}?", reply_markup=get_delete_confirm_keyboard(index)
-    )
+    if not ids:
+        await message.answer("ID должны быть числами.\nПример: /del 1, 2, 3")
+        return
+
+    await show_delete_confirm(message, ids, state)
+
+
+@router.message(DeleteNote.waiting_for_ids)
+async def on_ids_input(message: Message, state: FSMContext):
+    ids = parse_ids(message.text)
+
+    if not ids:
+        await message.answer("ID должны быть числами через запятую. Пример: 1, 2, 3")
+        return
+
+    await show_delete_confirm(message, ids, state)
 
 
 @router.callback_query()
-async def on_delete_confirm(callback: CallbackQuery):
+async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
     from database import get_notes, delete_note
 
     data = callback.data
-    action, index_str = data.split(":")
-    index = int(index_str)
+    action, ids_str = data.split(":")
+    ids = list(map(int, ids_str.split(",")))
 
     if action == "confirm_delete":
         notes = await get_notes()
-        if 1 <= index <= len(notes):
-            note = notes[index - 1]
-            await delete_note(note.id)
-            await callback.message.edit_text(
-                f"✅ Запись #{index} удалена", reply_markup=None
-            )
+        deleted = []
+
+        for idx in ids:
+            if 1 <= idx <= len(notes):
+                note = notes[idx - 1]
+                await delete_note(note.id)
+                deleted.append(idx)
+
+        if deleted:
+            text = "✅ Записи #" + ", ".join(map(str, deleted)) + " удалены"
         else:
-            await callback.message.edit_text(
-                f"Запись #{index} уже удалена", reply_markup=None
-            )
+            text = "Записи уже удалены"
+
+        await callback.message.edit_text(text, reply_markup=None)
     else:
-        await callback.message.edit_text(
-            f"Запись #{index} сохранена", reply_markup=None
-        )
+        await callback.message.edit_text("Удаление отменено", reply_markup=None)
 
     await callback.answer()
+    await state.clear()
