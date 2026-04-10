@@ -88,6 +88,8 @@ async def _process_photo(
 
     small_id, large_id = large_and_small
     caption = message.caption.strip() if message.caption else ""
+    if caption.startswith("/"):
+        caption = ""
     text = args_text or caption
     text, truncated = truncate_text(text) if text else ("", False)
 
