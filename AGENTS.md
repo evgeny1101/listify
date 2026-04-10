@@ -15,6 +15,8 @@ python main.py
 - aiogram==3.4.1 — Telegram Bot API
 - aiosqlite==0.20.0 — асинхронный SQLite
 - python-dotenv==1.0.1 — работа с .env
+- pytest==8.0.0 — тестирование
+- pytest-asyncio==0.23.5 — async тесты
 
 ## Структура
 
@@ -27,7 +29,8 @@ python main.py
 ## Разработка
 
 - Линтинг: использовать скил `/lint`
-- Тесты: отсутствуют
+- Тесты: `pytest` (42 теста, покрытие database, handlers, formatters)
+- Запуск тестов: `python -m pytest tests/ -v`
 - Сброс БД: `rm listify.db`
 
 ## Скилы
