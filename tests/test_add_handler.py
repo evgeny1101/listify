@@ -110,7 +110,9 @@ class TestAddNoteText:
 
         with patch("handlers.list.get_notes", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = sample_notes
-            with patch("handlers.list.send_notes_in_chunks", new_callable=AsyncMock) as mock_send:
+            with patch(
+                "handlers.list.send_notes_in_chunks", new_callable=AsyncMock
+            ) as mock_send:
                 await add_note_text(mock_message, mock_state)
 
                 mock_add_note.assert_not_called()

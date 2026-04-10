@@ -14,7 +14,12 @@ class DeleteNote(StatesGroup):
     waiting_for_ids = State()
 
 
-def parse_ids(text: str) -> list[int]:
+MAX_ID = 10000
+MAX_RANGE = 100
+MAX_TOTAL = 500
+
+
+def parse_ids(text: str) -> list[int] | None:
     parsed = []
     for part in text.split(","):
         part = part.strip()
@@ -27,15 +32,26 @@ def parse_ids(text: str) -> list[int]:
                     start, end = int(range_parts[0]), int(range_parts[1])
                     if start > end:
                         start, end = end, start
+                    if start > MAX_ID:
+                        start = MAX_ID
+                    if end > MAX_ID:
+                        end = MAX_ID
+                    range_size = end - start + 1
+                    if range_size > MAX_RANGE:
+                        return None
                     parsed.extend(range(start, end + 1))
                 except ValueError:
                     pass
         else:
             try:
-                parsed.append(int(part))
+                num = int(part)
+                if num <= MAX_ID:
+                    parsed.append(num)
             except ValueError:
                 pass
-    return parsed
+    if len(parsed) > MAX_TOTAL:
+        return None
+    return parsed[:MAX_TOTAL]
 
 
 async def show_delete_confirm(message: Message, ids: list[int], state: FSMContext):
@@ -74,6 +90,11 @@ async def cmd_del(message: Message, state: FSMContext):
 
     ids = parse_ids(args)
 
+    if ids is None:
+        await message.answer(
+            f"Слишком много ID (макс. {MAX_TOTAL}) или слишком большой диапазон (макс. {MAX_RANGE})."
+        )
+        return
     if not ids:
         await message.answer(
             "ID должны быть числами или диапазоном.\nПример: /del 1, 2-3, 5"
@@ -98,16 +119,24 @@ async def on_ids_input(message: Message, state: FSMContext):
             if ids:
                 await show_delete_confirm(message, ids, state)
                 return
+            if ids is None:
+                await message.answer(
+                    f"Слишком много ID (макс. {MAX_TOTAL}) или слишком большой диапазон (макс. {MAX_RANGE})."
+                )
+                return
 
         await message.answer("❌ Операция прервана. Введите команду заново.")
         return
 
     ids = parse_ids(text)
 
-    if not ids:
+    if ids is None:
         await message.answer(
-            "ID должны быть числами через запятую или диапазоном. Пример: 1, 2-3, 5"
+            f"Слишком много ID (макс. {MAX_TOTAL}) или слишком большой диапазон (макс. {MAX_RANGE})."
         )
+        return
+    if not ids:
+        await message.answer("ID должны быть числами или диапазоном. Пример: 1, 2-3, 5")
         return
 
     await show_delete_confirm(message, ids, state)
