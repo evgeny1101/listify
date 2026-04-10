@@ -9,6 +9,12 @@ async def main():
     from handlers.list import router as list_router
     from handlers.delete import router as delete_router
 
+    from middlewares.fsm_interrupter import FSMInterrupterMiddleware
+    from middlewares.auto_logging import AutoLoggingMiddleware
+
+    dp.message.middleware(FSMInterrupterMiddleware())
+    dp.message.middleware(AutoLoggingMiddleware())
+
     dp.include_router(commands_router)
     dp.include_router(add_router)
     dp.include_router(list_router)
