@@ -132,8 +132,9 @@ async def _process_text(message: Message, state: FSMContext):
 @router.message(AddNote.waiting_for_content)
 async def add_note_content(message: Message, state: FSMContext):
     text = message.text.strip() if message.text else ""
+    text_or_none = message.text
 
-    if text.startswith("/"):
+    if text_or_none and text.startswith("/"):
         await state.clear()
 
         parts = text.split(maxsplit=1)
