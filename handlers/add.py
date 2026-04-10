@@ -6,6 +6,8 @@ from aiogram.fsm.state import State, StatesGroup
 
 router = Router()
 
+MAX_NOTE_LENGTH = 200
+
 
 class AddNote(StatesGroup):
     waiting_for_text = State()
@@ -19,10 +21,18 @@ async def cmd_add(message: Message, state: FSMContext):
     if text:
         from database import add_note
 
+        truncated = False
+        if len(text) > MAX_NOTE_LENGTH:
+            text = text[:MAX_NOTE_LENGTH]
+            truncated = True
+
         await add_note(text)
-        await message.answer("✅ Запись добавлена")
+        if truncated:
+            await message.answer("⚠️ Запись добавлена (обрезано до 200 символов)")
+        else:
+            await message.answer("✅ Запись добавлена")
     else:
-        await message.answer("Введите текст заметки:")
+        await message.answer(f"Введите текст заметки (до {MAX_NOTE_LENGTH} символов):")
         await state.set_state(AddNote.waiting_for_text)
 
 
@@ -30,6 +40,15 @@ async def cmd_add(message: Message, state: FSMContext):
 async def add_note_text(message: Message, state: FSMContext):
     from database import add_note
 
-    await add_note(message.text)
-    await message.answer("✅ Запись добавлена")
+    text = message.text
+    truncated = False
+    if len(text) > MAX_NOTE_LENGTH:
+        text = text[:MAX_NOTE_LENGTH]
+        truncated = True
+
+    await add_note(text)
+    if truncated:
+        await message.answer("⚠️ Запись добавлена (обрезано до 200 символов)")
+    else:
+        await message.answer("✅ Запись добавлена")
     await state.clear()
