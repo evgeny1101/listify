@@ -4,6 +4,8 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from bot.formatters import format_note_short, send_notes_in_chunks
+from database import get_notes, delete_note
+from keyboards import get_multi_delete_keyboard
 
 router = Router()
 
@@ -25,9 +27,6 @@ def parse_ids(text: str) -> list[int]:
 
 
 async def show_delete_confirm(message: Message, ids: list[int], state: FSMContext):
-    from database import get_notes
-    from keyboards import get_multi_delete_keyboard
-
     notes = await get_notes()
 
     valid_ids = [i for i in ids if 1 <= i <= len(notes)]
@@ -45,8 +44,6 @@ async def show_delete_confirm(message: Message, ids: list[int], state: FSMContex
 
 @router.message(Command("del"))
 async def cmd_del(message: Message, state: FSMContext):
-    from database import get_notes
-
     parts = message.text.split(maxsplit=1)
     args = parts[1].strip() if len(parts) > 1 else ""
 
@@ -85,8 +82,6 @@ async def on_ids_input(message: Message, state: FSMContext):
 
 @router.callback_query()
 async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
-    from database import get_notes, delete_note
-
     data = callback.data
     action, ids_str = data.split(":")
     ids = list(map(int, ids_str.split(",")))
