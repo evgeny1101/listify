@@ -26,6 +26,10 @@ python main.py
 
 ## Разработка
 
-- Линтинг: `pip install ruff && ruff check . && ruff format .`
+- Линтинг: использовать скил `/lint`
 - Тесты: отсутствуют
 - Сброс БД: `rm listify.db`
+
+## Скилы
+
+- `/lint` — запуск линтинга проекта
