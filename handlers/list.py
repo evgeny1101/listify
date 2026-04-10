@@ -1,8 +1,8 @@
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import Command
-from bot.formatters import format_note_full, send_notes_in_chunks
-from database import get_notes
+from bot.formatters import send_note_with_image
+from database import get_notes, get_note_images
 
 router = Router()
 
@@ -15,4 +15,10 @@ async def cmd_list(message: Message):
         await message.answer("📭 Записей пока нет")
         return
 
-    await send_notes_in_chunks(message, notes, format_note_full)
+    for i, note in enumerate(notes, 1):
+        images = await get_note_images(note.id) if note.has_image else []
+
+        if images:
+            await send_note_with_image(message, i, note.text, images, use_large=True)
+        else:
+            await send_note_with_image(message, i, note.text, [], use_large=False)

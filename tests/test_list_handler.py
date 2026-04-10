@@ -18,13 +18,17 @@ class TestCmdList:
     async def test_cmd_list_with_notes_sends_messages(self, mock_message, sample_notes):
         with patch("handlers.list.get_notes", new_callable=AsyncMock) as mock_get:
             with patch(
-                "handlers.list.send_notes_in_chunks", new_callable=AsyncMock
-            ) as mock_send:
-                mock_get.return_value = sample_notes
+                "handlers.list.get_note_images", new_callable=AsyncMock
+            ) as mock_images:
+                with patch(
+                    "handlers.list.send_note_with_image", new_callable=AsyncMock
+                ) as mock_send:
+                    mock_get.return_value = sample_notes
+                    mock_images.return_value = []
 
-                await cmd_list(mock_message)
+                    await cmd_list(mock_message)
 
-                mock_send.assert_called_once()
+                    mock_send.assert_called()
 
     @pytest.mark.asyncio
     async def test_cmd_list_gets_notes_from_db(self, mock_message):

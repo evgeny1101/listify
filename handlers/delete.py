@@ -3,8 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from bot.formatters import format_note_short, send_notes_in_chunks
-from database import get_notes, delete_note
+from database import get_notes, get_note_images, delete_note
 from keyboards import get_multi_delete_keyboard
 
 router = Router()
@@ -65,8 +64,15 @@ async def show_delete_confirm(message: Message, ids: list[int], state: FSMContex
 
     await state.update_data(ids=valid_ids)
 
-    text = "Удалить записи #" + ", ".join(map(str, valid_ids)) + "?"
+    from bot.formatters import send_note_short_with_image
 
+    for idx in valid_ids:
+        if 1 <= idx <= len(notes):
+            note = notes[idx - 1]
+            images = await get_note_images(note.id) if note.has_image else []
+            await send_note_short_with_image(message, idx, note.text, images)
+
+    text = "Удалить записи #" + ", ".join(map(str, valid_ids)) + "?"
     await message.answer(text, reply_markup=get_multi_delete_keyboard(valid_ids))
 
 
@@ -82,7 +88,12 @@ async def cmd_del(message: Message, state: FSMContext):
         return
 
     if not args:
-        await send_notes_in_chunks(message, notes, format_note_short)
+        from bot.formatters import send_note_short_with_image
+
+        for i, note in enumerate(notes, 1):
+            images = await get_note_images(note.id) if note.has_image else []
+            await send_note_short_with_image(message, i, note.text, images)
+
         text = "\nВведите ID (можно несколько через запятую или диапазон). Пример: 1, 2-3, 5"
         await message.answer(text)
         await state.set_state(DeleteNote.waiting_for_ids)

@@ -58,6 +58,7 @@ class TestGetNotes:
                 "id": 1,
                 "text": "Test note",
                 "created_at": "2024-01-01T10:00:00",
+                "has_image": 0,
             }[key]
             mock_cursor = MagicMock()
             mock_cursor.fetchall = AsyncMock(return_value=[mock_row])
@@ -77,6 +78,7 @@ class TestGetNotes:
             assert len(result) == 1
             assert result[0].id == 1
             assert result[0].text == "Test note"
+            assert result[0].has_image is False
 
     @pytest.mark.asyncio
     async def test_get_notes_returns_empty_list_when_empty(self):

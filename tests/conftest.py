@@ -32,6 +32,14 @@ def mock_message():
     message = AsyncMock()
     message.message_id = 1
     message.text = ""
+    message.photo = None
+    message.video = None
+    message.document = None
+    message.voice = None
+    message.audio = None
+    message.sticker = None
+    message.animation = None
+    message.caption = None
     message.answer = AsyncMock()
     message.from_user = MagicMock()
     message.from_user.id = 123
@@ -77,17 +85,70 @@ def sample_notes():
         type(
             "Note",
             (),
-            {"id": 1, "text": "First note", "created_at": "2024-01-01T10:00:00"},
+            {
+                "id": 1,
+                "text": "First note",
+                "created_at": "2024-01-01T10:00:00",
+                "has_image": False,
+            },
         )(),
         type(
             "Note",
             (),
-            {"id": 2, "text": "Second note", "created_at": "2024-01-02T10:00:00"},
+            {
+                "id": 2,
+                "text": "Second note",
+                "created_at": "2024-01-02T10:00:00",
+                "has_image": False,
+            },
         )(),
         type(
             "Note",
             (),
-            {"id": 3, "text": "Third note", "created_at": "2024-01-03T10:00:00"},
+            {
+                "id": 3,
+                "text": "Third note",
+                "created_at": "2024-01-03T10:00:00",
+                "has_image": False,
+            },
+        )(),
+    ]
+
+
+@pytest.fixture
+def sample_notes_with_image():
+    return [
+        type(
+            "Note",
+            (),
+            {
+                "id": 1,
+                "text": "Note with image",
+                "created_at": "2024-01-01T10:00:00",
+                "has_image": True,
+            },
+        )(),
+        type(
+            "Note",
+            (),
+            {
+                "id": 2,
+                "text": "Note without image",
+                "created_at": "2024-01-02T10:00:00",
+                "has_image": False,
+            },
+        )(),
+    ]
+
+
+@pytest.fixture
+def sample_images():
+    return [
+        type(
+            "NoteImage", (), {"note_id": 1, "size": "small", "file_id": "small_file_id"}
+        )(),
+        type(
+            "NoteImage", (), {"note_id": 1, "size": "large", "file_id": "large_file_id"}
         )(),
     ]
 
@@ -104,6 +165,19 @@ def mock_add_note():
     with patch("handlers.add.add_note", new_callable=AsyncMock) as mock:
         mock.return_value = 1
         yield mock
+
+
+@pytest.fixture
+def mock_add_note_image():
+    with patch("handlers.add.add_note_image", new_callable=AsyncMock) as mock:
+        yield mock
+
+
+@pytest.fixture
+def mock_photo():
+    photo = MagicMock()
+    photo.file_id = "test_file_id"
+    return photo
 
 
 @pytest.fixture

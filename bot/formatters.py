@@ -1,4 +1,5 @@
 from aiogram.types import Message
+from aiogram.exceptions import TelegramBadRequest
 
 NOTE_SEPARATOR = "═"
 NOTE_DELIMITER = "─"
@@ -39,3 +40,67 @@ async def send_notes_in_chunks(message: Message, notes, format_func):
 
     for chunk in chunks:
         await message.answer(chunk)
+
+
+async def send_note_with_image(
+    message: Message,
+    index: int,
+    text: str,
+    images: list,
+    use_large: bool = False,
+):
+    header = f"📌 #{index} {NOTE_SEPARATOR * 3}"
+    footer = NOTE_DELIMITER * len(header)
+
+    size = "large" if use_large else "small"
+    image = next((img for img in images if img.size == size), None)
+
+    if not image:
+        image = next(iter(images), None)
+
+    full_text = f"{header}\n{text}\n{footer}" if text else header
+
+    if image:
+        try:
+            await message.answer_photo(
+                photo=image.file_id,
+                caption=full_text,
+            )
+            return True
+        except TelegramBadRequest:
+            await message.answer(f"{full_text}\n⚠️ Изображение недоступно")
+            return False
+
+    await message.answer(full_text)
+    return True
+
+
+async def send_note_short_with_image(
+    message: Message,
+    index: int,
+    text: str,
+    images: list,
+):
+    header = f"📌 #{index} {NOTE_SEPARATOR * 3}"
+    footer = NOTE_DELIMITER * len(header)
+    truncated = text[:25] + "..." if len(text) > 25 else text
+    preview_text = f"{header}\n{truncated}\n{footer}" if text else header
+
+    image = next((img for img in images if img.size == "small"), None)
+
+    if not image:
+        image = next(iter(images), None)
+
+    if image:
+        try:
+            await message.answer_photo(
+                photo=image.file_id,
+                caption=preview_text,
+            )
+            return True
+        except TelegramBadRequest:
+            await message.answer(f"{preview_text}\n⚠️ Изображение недоступно")
+            return False
+
+    await message.answer(preview_text)
+    return True

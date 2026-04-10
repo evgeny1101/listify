@@ -4,7 +4,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
-from database import add_note
+from database import add_note, add_note_image
 from keyboards import get_cancel_keyboard
 
 router = Router()
@@ -18,12 +18,42 @@ def truncate_text(text: str) -> tuple[str, bool]:
     return text, False
 
 
+def get_photo_file_ids(message: Message) -> tuple[str, str] | None:
+    if not message.photo:
+        return None
+    photos = list(message.photo)
+    if len(photos) < 2:
+        return None, photos[0].file_id
+    return photos[0].file_id, photos[-1].file_id
+
+
+def has_unsupported_content(message: Message) -> bool:
+    return any(
+        [
+            message.video,
+            message.document,
+            message.voice,
+            message.audio,
+            message.sticker,
+            message.animation,
+        ]
+    )
+
+
 class AddNote(StatesGroup):
-    waiting_for_text = State()
+    waiting_for_content = State()
 
 
 @router.message(Command("add"))
 async def cmd_add(message: Message, state: FSMContext):
+    if message.photo:
+        await _process_photo(message, state, from_command=True)
+        return
+
+    if has_unsupported_content(message):
+        await message.answer("⚠️ Поддерживаются только текст и изображения")
+        return
+
     parts = message.text.split(maxsplit=1)
     text = parts[1].strip() if len(parts) > 1 else ""
 
@@ -36,14 +66,70 @@ async def cmd_add(message: Message, state: FSMContext):
             await message.answer("✅ Запись добавлена")
     else:
         await message.answer(
-            f"Введите текст заметки (до {MAX_NOTE_LENGTH} символов):",
+            "Введите текст или отправьте изображение:",
             reply_markup=get_cancel_keyboard(),
         )
-        await state.set_state(AddNote.waiting_for_text)
+        await state.set_state(AddNote.waiting_for_content)
 
 
-@router.message(AddNote.waiting_for_text)
-async def add_note_text(message: Message, state: FSMContext):
+async def _process_photo(
+    message: Message, state: FSMContext, from_command: bool = False
+):
+    large_and_small = get_photo_file_ids(message)
+
+    if not large_and_small:
+        await message.answer("⚠️ Не удалось получить изображение")
+        return
+
+    if len(list(message.photo)) > 2:
+        warning = "⚠️ Можно добавить только первое изображение\n"
+    else:
+        warning = ""
+
+    small_id, large_id = large_and_small
+    caption = message.caption.strip() if message.caption else ""
+    text, truncated = truncate_text(caption) if caption else ("", False)
+
+    note_id = await add_note(text) if text else await add_note("📷 Изображение")
+
+    await add_note_image(note_id, "small", small_id)
+    await add_note_image(note_id, "large", large_id)
+
+    parts = []
+    if warning:
+        parts.append(warning)
+    if text:
+        if truncated:
+            parts.append("⚠️ Запись добавлена (обрезано до 200 символов)")
+        else:
+            parts.append("✅ Запись добавлена")
+    else:
+        parts.append("✅ Изображение добавлено")
+
+    await message.answer("".join(parts))
+
+
+async def _process_text(message: Message, state: FSMContext):
+    text = message.text.strip() if message.text else ""
+    if not text:
+        await message.answer("⚠️ Введите текст заметки")
+        return
+
+    if has_unsupported_content(message):
+        await message.answer("⚠️ Поддерживаются только текст и изображения")
+        return
+
+    text, truncated = truncate_text(text)
+    await add_note(text)
+    if truncated:
+        await message.answer("⚠️ Запись добавлена (обрезано до 200 символов)")
+    else:
+        await message.answer("✅ Запись добавлена")
+    await state.clear()
+
+
+@router.message(AddNote.waiting_for_content)
+async def add_note_content(message: Message, state: FSMContext):
     text = message.text.strip() if message.text else ""
 
     if text.startswith("/"):
@@ -54,8 +140,7 @@ async def add_note_text(message: Message, state: FSMContext):
         args = parts[1].strip() if len(parts) > 1 else ""
 
         if command == "/add" and args:
-            await add_note(args)
-            await message.answer("✅ Запись добавлена")
+            await cmd_add(message, type("obj", (), {"text": args, "photo": None})())
             return
 
         if command == "/del" and args:
@@ -93,13 +178,11 @@ async def add_note_text(message: Message, state: FSMContext):
         await message.answer("❌ Операция прервана. Введите команду заново.")
         return
 
-    text, truncated = truncate_text(text)
-    await add_note(text)
-    if truncated:
-        await message.answer("⚠️ Запись добавлена (обрезано до 200 символов)")
-    else:
-        await message.answer("✅ Запись добавлена")
-    await state.clear()
+    if message.photo:
+        await _process_photo(message, state)
+        return
+
+    await _process_text(message, state)
 
 
 @router.callback_query(F.data == "cancel_add")
