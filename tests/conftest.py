@@ -47,7 +47,18 @@ def mock_state():
     state.clear = AsyncMock()
     state.update_data = AsyncMock()
     state.get_data = AsyncMock(return_value={})
+    state.get_state = AsyncMock(return_value=None)
     return state
+
+
+@pytest.fixture
+def mock_callback_query():
+    callback = AsyncMock()
+    callback.data = "cancel_input"
+    callback.answer = AsyncMock()
+    callback.message = AsyncMock()
+    callback.message.edit_text = AsyncMock()
+    return callback
 
 
 @pytest.fixture

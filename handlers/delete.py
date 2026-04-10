@@ -71,7 +71,24 @@ async def cmd_del(message: Message, state: FSMContext):
 
 @router.message(DeleteNote.waiting_for_ids)
 async def on_ids_input(message: Message, state: FSMContext):
-    ids = parse_ids(message.text)
+    text = message.text.strip() if message.text else ""
+
+    if text.startswith("/"):
+        await state.clear()
+
+        parts = text.split(maxsplit=1)
+        command = parts[0]
+
+        if command == "/del" and len(parts) > 1 and parts[1].strip():
+            ids = parse_ids(parts[1])
+            if ids:
+                await show_delete_confirm(message, ids, state)
+                return
+
+        await message.answer("❌ Операция прервана. Введите команду заново.")
+        return
+
+    ids = parse_ids(text)
 
     if not ids:
         await message.answer("ID должны быть числами через запятую. Пример: 1, 2, 3")
