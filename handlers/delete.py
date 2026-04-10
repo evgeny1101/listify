@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from bot.formatters import format_note_short, send_notes_in_chunks
 
 router = Router()
 
@@ -56,13 +57,9 @@ async def cmd_del(message: Message, state: FSMContext):
         return
 
     if not args:
-        text = "📝 <b>Ваши записи:</b>\n\n"
-        for i, note in enumerate(notes, 1):
-            text += f"{i}. {note.text}\n"
-
-        text += "\nВведите ID (можно несколько через запятую). Пример: 1, 2, 3"
-
-        await message.answer(text, parse_mode="HTML")
+        await send_notes_in_chunks(message, notes, format_note_short)
+        text = "\nВведите ID (можно несколько через запятую). Пример: 1, 2, 3"
+        await message.answer(text)
         await state.set_state(DeleteNote.waiting_for_ids)
         return
 
@@ -77,13 +74,24 @@ async def cmd_del(message: Message, state: FSMContext):
 
 @router.message(DeleteNote.waiting_for_ids)
 async def on_ids_input(message: Message, state: FSMContext):
+    from database import get_notes
+
     ids = parse_ids(message.text)
 
     if not ids:
         await message.answer("ID должны быть числами через запятую. Пример: 1, 2, 3")
         return
 
-    await show_delete_confirm(message, ids, state)
+    notes = await get_notes()
+
+    if not notes:
+        await message.answer("Записей нет")
+        return
+
+    await send_notes_in_chunks(message, notes, format_note_short)
+
+    text = "\nВведите ID (можно несколько через запятую). Пример: 1, 2, 3"
+    await message.answer(text)
 
 
 @router.callback_query()
