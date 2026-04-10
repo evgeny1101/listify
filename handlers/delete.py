@@ -74,24 +74,13 @@ async def cmd_del(message: Message, state: FSMContext):
 
 @router.message(DeleteNote.waiting_for_ids)
 async def on_ids_input(message: Message, state: FSMContext):
-    from database import get_notes
-
     ids = parse_ids(message.text)
 
     if not ids:
         await message.answer("ID должны быть числами через запятую. Пример: 1, 2, 3")
         return
 
-    notes = await get_notes()
-
-    if not notes:
-        await message.answer("Записей нет")
-        return
-
-    await send_notes_in_chunks(message, notes, format_note_short)
-
-    text = "\nВведите ID (можно несколько через запятую). Пример: 1, 2, 3"
-    await message.answer(text)
+    await show_delete_confirm(message, ids, state)
 
 
 @router.callback_query()
