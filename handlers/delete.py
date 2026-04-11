@@ -56,7 +56,9 @@ def parse_ids(text: str) -> list[int] | None:
     return parsed[:MAX_TOTAL]
 
 
-async def show_delete_confirm(message: Message, ids: list[int], state: FSMContext) -> None:
+async def show_delete_confirm(
+    message: Message, ids: list[int], state: FSMContext
+) -> None:
     notes = await get_notes()
 
     valid_ids = list(dict.fromkeys([i for i in ids if 1 <= i <= len(notes)]))
