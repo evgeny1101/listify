@@ -8,9 +8,12 @@ async def main():
     from handlers.commands import router as commands_router
     from handlers.delete import router as delete_router
     from handlers.list import router as list_router
+    from middlewares.access_check import AccessCheckMiddleware
     from middlewares.auto_logging import AutoLoggingMiddleware
     from middlewares.fsm_interrupter import FSMInterrupterMiddleware
 
+    # Add access check middleware first to reject unauthorized users early
+    dp.message.middleware(AccessCheckMiddleware())
     dp.message.middleware(FSMInterrupterMiddleware())
     dp.message.middleware(AutoLoggingMiddleware())
 

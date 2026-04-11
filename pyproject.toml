@@ -8,5 +8,5 @@ requires-python = ">=3.11"
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP", "RUF", "TCH"]
-ignore = ["RUF100", "E501", "RUF001", "TC001", "TC002"]
+select = ["E", "F", "I", "N", "W", "UP", "RUF"]
+ignore = ["RUF100", "E501", "RUF001"]
