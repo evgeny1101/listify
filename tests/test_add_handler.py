@@ -233,7 +233,7 @@ class TestAddNoteContent:
     async def test_add_note_content_intercepts_command_and_clears_state(
         self, mock_message, mock_state, mock_add_note, sample_notes
     ):
-        mock_message.text = "/list"
+        mock_message.text = "/ls"
         mock_message.photo = None
 
         with patch("handlers.list.get_notes", new_callable=AsyncMock) as mock_get:

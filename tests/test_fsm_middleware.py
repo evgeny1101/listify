@@ -70,7 +70,7 @@ class TestFSMInterrupterMiddleware:
         state.get_state = AsyncMock(return_value="AddNote:waiting_for_text")
         data = {"state": state}
 
-        commands = ["/start", "/list", "/help", "/add", "/del"]
+        commands = ["/start", "/ls", "/help", "/add", "/del"]
 
         for cmd_text in commands:
             message = MagicMock()

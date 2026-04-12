@@ -10,7 +10,7 @@ from database import get_note_images, get_notes
 router = Router()
 
 
-@router.message(Command("list"))
+@router.message(Command("ls"))
 async def cmd_list(message: Message):
     notes = await get_notes()
 

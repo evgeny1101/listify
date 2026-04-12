@@ -143,7 +143,7 @@ class TestOnIdsInput:
     async def test_on_ids_input_intercepts_command_clears_state(
         self, mock_message, mock_state
     ):
-        mock_message.text = "/list"
+        mock_message.text = "/ls"
 
         await on_ids_input(mock_message, mock_state)
 

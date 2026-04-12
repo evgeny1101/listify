@@ -157,7 +157,7 @@ async def add_note_content(message: Message, state: FSMContext):
                 await show_delete_confirm(message, ids, state)
                 return
 
-        if command == "/list":
+        if command == "/ls":
             from handlers.list import cmd_list
 
             await cmd_list(message)

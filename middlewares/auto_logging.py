@@ -5,7 +5,7 @@ from aiogram.types import Message
 
 from bot.logging_config import logger
 
-COMMANDS = {"/start", "/help", "/add", "/del", "/list"}
+COMMANDS = {"/start", "/help", "/add", "/del", "/ls"}
 
 user_id_var: ContextVar[int] = ContextVar("user_id", default=None)
 command_var: ContextVar[str] = ContextVar("command", default=None)
