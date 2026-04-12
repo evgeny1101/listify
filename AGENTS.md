@@ -15,8 +15,11 @@ python main.py
 - aiogram==3.4.1 — Telegram Bot API
 - aiosqlite==0.20.0 — асинхронный SQLite
 - python-dotenv==1.0.1 — работа с .env
-- pytest==8.0.0 — тестирование
-- pytest-asyncio==0.23.5 — async тесты
+
+Для разработки и тестов:
+```bash
+pip install -r requirements-dev.txt
+```
 
 ## Структура
 
@@ -45,5 +48,5 @@ python main.py
 
 Для работы с документацией библиотек используется MCP context7:
 - Запрос документации: `context7_resolve-library-id` + `context7_query-docs`
-- Библиотека определяется автоматически по версии из requirements.txt
+- Библиотека определяется автоматически по версии из requirements.txt (продакшен) или requirements-dev.txt (разработка)
 - Примеры запросов: "aiogram filters", "aiosqlite async connection"
