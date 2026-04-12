@@ -40,3 +40,10 @@ python main.py
 
 - `/lint` — запуск линтинга проекта
 - `/test` — запуск тестов проекта
+
+## Context7 (MCP)
+
+Для работы с документацией библиотек используется MCP context7:
+- Запрос документации: `context7_resolve-library-id` + `context7_query-docs`
+- Библиотека определяется автоматически по версии из requirements.txt
+- Примеры запросов: "aiogram filters", "aiosqlite async connection"
