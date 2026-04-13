@@ -8,3 +8,8 @@ services:
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
       - ALLOWED_USERS=${ALLOWED_USERS}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
