@@ -1,5 +1,6 @@
 services:
   bot:
+    container_name: listify
     build: .
     restart: unless-stopped
     volumes:
