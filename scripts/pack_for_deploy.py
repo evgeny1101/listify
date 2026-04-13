@@ -1,5 +1,5 @@
-import tarfile
 import os
+import tarfile
 from datetime import datetime
 
 FILES = [
@@ -34,7 +34,7 @@ FILES = [
 def pack():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     archive_name = f"listify-deploy-{timestamp}.tar.gz"
-    
+
     with tarfile.open(archive_name, "w:gz") as tar:
         for f in FILES:
             if os.path.exists(f):
