@@ -71,16 +71,6 @@ def mock_callback_query():
 
 
 @pytest.fixture
-def mock_callback():
-    callback = AsyncMock()
-    callback.data = "confirm:delete:1"
-    callback.answer = AsyncMock()
-    callback.message = AsyncMock()
-    callback.message.edit_text = AsyncMock()
-    return callback
-
-
-@pytest.fixture
 def sample_notes():
     return [
         type(
@@ -143,18 +133,6 @@ def sample_notes_with_image():
 
 
 @pytest.fixture
-def sample_images():
-    return [
-        type(
-            "NoteImage", (), {"note_id": 1, "size": "small", "file_id": "small_file_id"}
-        )(),
-        type(
-            "NoteImage", (), {"note_id": 1, "size": "large", "file_id": "large_file_id"}
-        )(),
-    ]
-
-
-@pytest.fixture
 def mock_get_notes(sample_notes):
     with patch("handlers.list.get_notes", new_callable=AsyncMock) as mock:
         mock.return_value = sample_notes
@@ -172,13 +150,6 @@ def mock_add_note():
 def mock_add_note_image():
     with patch("handlers.add.add_note_image", new_callable=AsyncMock) as mock:
         yield mock
-
-
-@pytest.fixture
-def mock_photo():
-    photo = MagicMock()
-    photo.file_id = "test_file_id"
-    return photo
 
 
 @pytest.fixture

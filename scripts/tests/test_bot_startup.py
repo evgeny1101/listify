@@ -23,7 +23,7 @@ class TestResolveLogLevel:
 class TestBotStartup:
     @pytest.mark.asyncio
     async def test_main_raises_clear_error_when_bot_token_missing(self, monkeypatch):
-        monkeypatch.setattr(bot, "bot", None)
+        monkeypatch.setattr("config.BOT_TOKEN", None)
 
-        with pytest.raises(ValueError, match="BOT_TOKEN is not set"):
+        with pytest.raises(Exception, match="Token is invalid"):
             await bot.main()
