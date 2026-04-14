@@ -21,8 +21,18 @@ description: Процесс релиза: чеклист для создания
 
 - [ ] Запушить все коммиты: `git push origin master`
 - [ ] Создать и запушить тег: `git tag vX.X.X && git push origin vX.X.X`
-- [ ] Проверить GitHub Actions: https://github.com/evgeny1101/listify/actions
-- [ ] Проверить Docker образ: https://github.com/evgeny1101/listify/pkgs/container/listify
+
+### 4. Пострелиз (проверить через gh)
+
+```bash
+# Проверить GitHub Actions
+gh run list --repo evgeny1101/listify --limit 2
+
+# Проверить Docker образ
+gh api "users/evgeny1101/packages?package_type=container" -q '.[].name'
+```
+
+Ожидать: `completed success` для последнего workflow.
 
 ---
 
