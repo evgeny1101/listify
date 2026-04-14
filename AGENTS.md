@@ -43,6 +43,7 @@ pip install -r requirements-dev.txt
 
 - `/lint` — запуск линтинга проекта
 - `/test` — запуск тестов проекта
+- `/release` — чеклист для создания тега и публикации в GitHub
 
 ## Docker
 
