@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -47,7 +47,9 @@ class TestAddNote:
             result = await add_note("Test")
 
             assert result == 1
-            mock_connection.execute.assert_called_once()
+            mock_connection.execute.assert_any_call(
+                "INSERT INTO notes (text, created_at) VALUES (?, ?)", ("Test", ANY)
+            )
 
 
 class TestGetNotes:
