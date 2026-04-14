@@ -35,7 +35,7 @@ pip install -r requirements-dev.txt
 - При добавлении новых функций: всегда добавлять аннотации типов
 - Тесты: использовать скил `/test` (85 тестов, покрытие database, handlers, formatters, middlewares)
 - При внесении изменений: сначала добавить/обновить тесты, затем запустить `/test`
-- Запуск тестов вручную: `source venv/bin/activate && python -m pytest scripts/tests/ -v`
+- Запуск тестов вручную: `source venv/bin/activate && python -m pytest tests/ -v`
 - Сброс БД: `rm listify.db`
 - Все изменения должны проходить lint + тесты перед завершением
 
