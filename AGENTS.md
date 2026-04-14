@@ -44,6 +44,11 @@ pip install -r requirements-dev.txt
 - `/lint` — запуск линтинга проекта
 - `/test` — запуск тестов проекта
 
+## Docker
+
+- Образ: ghcr.io/evgeny1101/listify
+- При пуше тега: обновить версию в docker-compose.yml
+
 ## Context7 (MCP)
 
 Для работы с документацией библиотек используется MCP context7:
