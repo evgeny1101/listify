@@ -31,6 +31,7 @@ FILES = [
     "models/note.py",
 ]
 
+
 def pack():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     archive_name = f"listify-deploy-{timestamp}.tar.gz"
@@ -42,6 +43,7 @@ def pack():
             else:
                 print(f"WARNING: {f} not found")
     print(f"Created: {archive_name}")
+
 
 if __name__ == "__main__":
     pack()

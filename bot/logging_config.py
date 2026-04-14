@@ -10,6 +10,17 @@ DEFAULT_FORMAT = "[%(asctime)s] %(levelname)s | %(name)s:%(lineno)d - %(message)
 DEFAULT_DATE_FORMAT = "%H:%M:%S"
 
 
+def resolve_log_level(level_name: str | None) -> tuple[int, bool]:
+    if not level_name:
+        return logging.INFO, False
+
+    level = getattr(logging, level_name.upper(), None)
+    if isinstance(level, int):
+        return level, False
+
+    return logging.INFO, True
+
+
 class CustomFormatter(logging.Formatter):
     def format(self, record):
         user_id = getattr(record, "user_id", "-")
@@ -37,15 +48,23 @@ class ContextLoggerAdapter(logging.LoggerAdapter):
 
 log_format = os.getenv("LOG_FORMAT", DEFAULT_FORMAT)
 date_format = os.getenv("LOG_DATE_FORMAT", DEFAULT_DATE_FORMAT)
+configured_level_name = os.getenv("LOG_LEVEL", "INFO")
+log_level, invalid_log_level = resolve_log_level(configured_level_name)
 
 root_logger = logging.getLogger()
-root_logger.setLevel(getattr(logging, os.getenv("LOG_LEVEL", "INFO")))
+root_logger.setLevel(log_level)
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(CustomFormatter(log_format, datefmt=date_format))
 
 root_logger.handlers.clear()
 root_logger.addHandler(handler)
+
+if invalid_log_level:
+    root_logger.warning(
+        "Invalid LOG_LEVEL '%s', fallback to INFO",
+        configured_level_name,
+    )
 
 base_logger = logging.getLogger("listify")
 logger = ContextLoggerAdapter(base_logger, None)

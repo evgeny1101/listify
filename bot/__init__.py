@@ -4,6 +4,9 @@ from .run import bot, dp
 
 
 async def main():
+    if bot is None:
+        raise ValueError("BOT_TOKEN is not set. Please set BOT_TOKEN in .env")
+
     from handlers.add import router as add_router
     from handlers.commands import router as commands_router
     from handlers.delete import router as delete_router
@@ -26,6 +29,7 @@ async def main():
 
     await init_db()
 
+    assert bot is not None
     await bot.set_my_commands(commands)
 
     logger.info("Bot started...")
