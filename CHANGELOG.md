@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2026-04-15
+
+### Added
+- GitHub Actions workflow для Docker build & push в ghcr.io
+- Multi-platform сборка (amd64, arm64)
+
+### Changed
+- docker-compose.yml использует ghcr.io образ вместо локального build
+- Тесты перенесены в корень проекта (`tests/`)
+
+### Removed
+- Удалён скрипт `pack_for_deploy.py`
+- Удалена папка `scripts/`
+
+---
+
 ## [1.0.1] - 2026-04-15
 
 ### Refactored
