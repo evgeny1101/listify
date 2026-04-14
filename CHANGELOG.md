@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2026-04-15
+
+### Refactored
+- Reorder middlewares for early access denial
+- Unify callback_data format in keyboards
+- Replace type() with SimpleNamespace and move imports
+- Move load_dotenv to main.py and fix import order
+- Remove dead code _disable_foreign_keys
+- Make orphan image policy explicit
+
+### Fixed
+- Remove dead test fixtures and fix broken bot startup test
+
+### Changed
+- Update test path and harden startup config
+
+### Added
+- Add pack_for_deploy.py script
+
+---
+
 ## [1.0.0] - 2026-04-13
 
 ### Added
