@@ -13,10 +13,10 @@ async def main():
 
     from .run import bot, dp
 
-    # Middleware order: AutoLogging -> FSMInterrupter -> AccessCheck
-    dp.message.middleware(AutoLoggingMiddleware())
-    dp.message.middleware(FSMInterrupterMiddleware())
+    # Middleware order: AccessCheck -> FSMInterrupter -> AutoLogging
     dp.message.middleware(AccessCheckMiddleware())
+    dp.message.middleware(FSMInterrupterMiddleware())
+    dp.message.middleware(AutoLoggingMiddleware())
 
     dp.include_router(commands_router)
     dp.include_router(add_router)
