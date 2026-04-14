@@ -1,7 +1,7 @@
 services:
   bot:
     container_name: listify
-    image: ghcr.io/evgeny1101/listify:v1.0.1
+    image: ghcr.io/evgeny1101/listify:v1.0.3
     restart: unless-stopped
     volumes:
       - ./listify.db:/app/listify.db

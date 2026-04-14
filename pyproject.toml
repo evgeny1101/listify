@@ -1,6 +1,6 @@
 [project]
 name = "listify"
-version = "1.0.1"
+version = "1.0.3"
 description = "Telegram bot for notes"
 requires-python = ">=3.11"
 
