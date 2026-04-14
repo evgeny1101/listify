@@ -161,10 +161,10 @@ async def on_ids_input(message: Message, state: FSMContext):
 @router.callback_query()
 async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
     data = callback.data
-    action, ids_str = data.split(":")
+    _, target, ids_str = data.split(":")
     ids = list(map(int, ids_str.split(",")))
 
-    if action == "confirm_delete":
+    if target == "delete":
         notes = await get_notes()
         deleted = []
 

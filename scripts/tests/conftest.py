@@ -73,7 +73,7 @@ def mock_callback_query():
 @pytest.fixture
 def mock_callback():
     callback = AsyncMock()
-    callback.data = "confirm_delete:1"
+    callback.data = "confirm:delete:1"
     callback.answer = AsyncMock()
     callback.message = AsyncMock()
     callback.message.edit_text = AsyncMock()

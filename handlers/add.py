@@ -186,7 +186,7 @@ async def add_note_content(message: Message, state: FSMContext):
     await _process_text(message, state)
 
 
-@router.callback_query(F.data == "cancel_add")
+@router.callback_query(F.data == "cancel:add")
 async def on_cancel_input(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text("❌ Ввод заметки отменён")
     await callback.answer()

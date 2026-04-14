@@ -1,4 +1,9 @@
+
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+
+def _cancel_button(target: str) -> InlineKeyboardButton:
+    return InlineKeyboardButton(text="Отмена", callback_data=f"cancel:delete:{target}")
 
 
 def get_delete_confirm_keyboard(index: int) -> InlineKeyboardMarkup:
@@ -6,11 +11,9 @@ def get_delete_confirm_keyboard(index: int) -> InlineKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Да, удалить", callback_data=f"confirm_delete:{index}"
+                    text="Да, удалить", callback_data=f"confirm:delete:{index}"
                 ),
-                InlineKeyboardButton(
-                    text="Отмена", callback_data=f"cancel_delete:{index}"
-                ),
+                _cancel_button(str(index)),
             ]
         ]
     )
@@ -22,11 +25,9 @@ def get_multi_delete_keyboard(ids: list[int]) -> InlineKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Да, удалить все", callback_data=f"confirm_delete:{ids_str}"
+                    text="Да, удалить все", callback_data=f"confirm:delete:{ids_str}"
                 ),
-                InlineKeyboardButton(
-                    text="Отмена", callback_data=f"cancel_delete:{ids_str}"
-                ),
+                _cancel_button(ids_str),
             ]
         ]
     )

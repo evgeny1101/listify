@@ -1,9 +1,9 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
-def get_cancel_keyboard() -> InlineKeyboardMarkup:
+def get_cancel_keyboard(action: str = "add") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="Отмена", callback_data="cancel_add")]
+            [InlineKeyboardButton(text="Отмена", callback_data=f"cancel:{action}")]
         ]
     )

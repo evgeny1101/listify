@@ -304,7 +304,7 @@ class TestAddNoteContent:
 class TestOnCancelInput:
     @pytest.mark.asyncio
     async def test_on_cancel_input_clears_state(self, mock_callback_query, mock_state):
-        mock_callback_query.data = "cancel_add"
+        mock_callback_query.data = "cancel:add"
         await on_cancel_input(mock_callback_query, mock_state)
 
         mock_state.clear.assert_called_once()
@@ -315,7 +315,7 @@ class TestOnCancelInput:
 
     @pytest.mark.asyncio
     async def test_on_cancel_input_edits_message(self, mock_callback_query, mock_state):
-        mock_callback_query.data = "cancel_add"
+        mock_callback_query.data = "cancel:add"
         await on_cancel_input(mock_callback_query, mock_state)
 
         mock_callback_query.message.edit_text.assert_called_once()
@@ -331,7 +331,7 @@ class TestCancelKeyboard:
         assert len(keyboard.inline_keyboard) == 1
         assert len(keyboard.inline_keyboard[0]) == 1
         assert keyboard.inline_keyboard[0][0].text == "Отмена"
-        assert keyboard.inline_keyboard[0][0].callback_data == "cancel_add"
+        assert keyboard.inline_keyboard[0][0].callback_data == "cancel:add"
 
     @pytest.mark.asyncio
     async def test_cmd_add_without_text_has_cancel_button(
@@ -346,7 +346,7 @@ class TestCancelKeyboard:
         assert "reply_markup" in call_kwargs
         keyboard = call_kwargs["reply_markup"]
         assert keyboard is not None
-        assert keyboard.inline_keyboard[0][0].callback_data == "cancel_add"
+        assert keyboard.inline_keyboard[0][0].callback_data == "cancel:add"
 
 
 class TestProcessPhoto:
