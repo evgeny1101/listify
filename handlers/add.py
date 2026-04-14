@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -7,6 +9,9 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from database import add_note, add_note_image
+from handlers.commands import cmd_help, cmd_start
+from handlers.delete import cmd_del, parse_ids, show_delete_confirm
+from handlers.list import cmd_list
 from keyboards import get_cancel_keyboard
 
 router = Router()
@@ -146,38 +151,28 @@ async def add_note_content(message: Message, state: FSMContext):
         args = parts[1].strip() if len(parts) > 1 else ""
 
         if command == "/add" and args:
-            await cmd_add(message, type("obj", (), {"text": args, "photo": None})())
+            await cmd_add(message, SimpleNamespace(text=args, photo=None))
             return
 
         if command == "/del" and args:
-            from handlers.delete import parse_ids, show_delete_confirm
-
             ids = parse_ids(args)
             if ids:
                 await show_delete_confirm(message, ids, state)
                 return
 
         if command == "/ls":
-            from handlers.list import cmd_list
-
             await cmd_list(message)
             return
 
         if command == "/start":
-            from handlers.commands import cmd_start
-
             await cmd_start(message)
             return
 
         if command == "/help":
-            from handlers.commands import cmd_help
-
             await cmd_help(message)
             return
 
         if command == "/del":
-            from handlers.delete import cmd_del
-
             await cmd_del(message, state)
             return
 
