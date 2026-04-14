@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 
@@ -26,7 +28,7 @@ def format_note_short(index: int, text: str, limit: int = 25) -> str:
 async def send_notes_in_chunks(
     message: Message,
     notes: list[Note],
-    format_func: callable,
+    format_func: Callable[[int, str], str],
 ) -> None:
     chunks = []
     current_chunk = ""

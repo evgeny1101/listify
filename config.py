@@ -1,9 +1,5 @@
 from os import getenv
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 BOT_TOKEN: str | None = getenv("BOT_TOKEN")
 DB_PATH: str = "listify.db"
 

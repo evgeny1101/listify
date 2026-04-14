@@ -2,10 +2,6 @@ import logging
 import os
 import sys
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 DEFAULT_FORMAT = "[%(asctime)s] %(levelname)s | %(name)s:%(lineno)d - %(message)s"
 DEFAULT_DATE_FORMAT = "%H:%M:%S"
 
