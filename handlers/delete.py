@@ -7,7 +7,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from database import delete_note, get_note_images, get_notes
-from keyboards import get_multi_delete_keyboard
+from keyboards import get_cancel_keyboard, get_multi_delete_keyboard
 
 router = Router()
 
@@ -83,6 +83,8 @@ async def show_delete_confirm(
 
 @router.message(Command("del"))
 async def cmd_del(message: Message, state: FSMContext):
+    await state.clear()
+
     parts = message.text.split(maxsplit=1)
     args = parts[1].strip() if len(parts) > 1 else ""
 
@@ -93,14 +95,10 @@ async def cmd_del(message: Message, state: FSMContext):
         return
 
     if not args:
-        from bot.formatters import send_note_short_with_image
-
-        for i, note in enumerate(notes, 1):
-            images = await get_note_images(note.id) if note.has_image else []
-            await send_note_short_with_image(message, i, note.text, images)
-
-        text = "\nВведите ID (можно несколько через запятую или диапазон). Пример: 1, 2-3, 5"
-        await message.answer(text)
+        text = (
+            "Введите ID (можно несколько через запятую или диапазон). Пример: 1, 2-3, 5"
+        )
+        await message.answer(text, reply_markup=get_cancel_keyboard())
         await state.set_state(DeleteNote.waiting_for_ids)
         return
 
@@ -127,21 +125,12 @@ async def on_ids_input(message: Message, state: FSMContext):
     if text.startswith("/"):
         await state.clear()
 
-        parts = text.split(maxsplit=1)
-        command = parts[0]
+        if text == "/edit":
+            from handlers.edit import cmd_edit
 
-        if command == "/del" and len(parts) > 1 and parts[1].strip():
-            ids = parse_ids(parts[1])
-            if ids:
-                await show_delete_confirm(message, ids, state)
-                return
-            if ids is None:
-                await message.answer(
-                    f"Слишком много ID (макс. {MAX_TOTAL}) или слишком большой диапазон (макс. {MAX_RANGE})."
-                )
-                return
+            await cmd_edit(message, state)
+            return
 
-        await message.answer("❌ Операция прервана. Введите команду заново.")
         return
 
     ids = parse_ids(text)
@@ -161,10 +150,10 @@ async def on_ids_input(message: Message, state: FSMContext):
 @router.callback_query()
 async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
     data = callback.data
-    _, target, ids_str = data.split(":")
+    action, _, ids_str = data.split(":")
     ids = list(map(int, ids_str.split(",")))
 
-    if target == "delete":
+    if action == "confirm":
         notes = await get_notes()
         deleted = []
 

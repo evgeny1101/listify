@@ -6,6 +6,7 @@ async def main():
     from handlers.add import router as add_router
     from handlers.commands import router as commands_router
     from handlers.delete import router as delete_router
+    from handlers.edit import router as edit_router
     from handlers.list import router as list_router
     from middlewares.access_check import AccessCheckMiddleware
     from middlewares.auto_logging import AutoLoggingMiddleware
@@ -22,6 +23,7 @@ async def main():
     dp.include_router(add_router)
     dp.include_router(list_router)
     dp.include_router(delete_router)
+    dp.include_router(edit_router)
 
     from database import init_db
 

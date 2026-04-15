@@ -79,6 +79,15 @@ async def delete_note(note_id: int) -> bool:
         return cursor.rowcount > 0
 
 
+async def update_note(note_id: int, new_text: str) -> bool:
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute(
+            "UPDATE notes SET text = ? WHERE id = ?", (new_text, note_id)
+        )
+        await db.commit()
+        return cursor.rowcount > 0
+
+
 async def add_note_image(
     note_id: int, size: Literal["small", "large"], file_id: str
 ) -> None:

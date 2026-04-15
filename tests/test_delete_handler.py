@@ -72,7 +72,9 @@ class TestCmdDel:
             await cmd_del(mock_message, mock_state)
 
             assert mock_state.set_state.called
-            assert mock_message.answer.call_count >= 2
+            assert mock_message.answer.call_count == 1
+            call_args = mock_message.answer.call_args[0][0]
+            assert "ID" in call_args
 
     @pytest.mark.asyncio
     async def test_cmd_del_with_args_calls_confirm(
@@ -148,8 +150,7 @@ class TestOnIdsInput:
         await on_ids_input(mock_message, mock_state)
 
         mock_state.clear.assert_called_once()
-        call_args = mock_message.answer.call_args[0][0]
-        assert "прервана" in call_args
+        mock_message.answer.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_on_ids_input_with_del_and_ids_calls_confirm(
@@ -159,11 +160,10 @@ class TestOnIdsInput:
 
         with patch("handlers.delete.get_notes", new_callable=AsyncMock) as mock_get:
             mock_get.return_value = sample_notes
-            with patch(
-                "handlers.delete.show_delete_confirm", new_callable=AsyncMock
-            ) as mock_confirm:
-                await on_ids_input(mock_message, mock_state)
-                mock_confirm.assert_called_once()
+            await on_ids_input(mock_message, mock_state)
+
+            mock_state.clear.assert_called_once()
+            mock_message.answer.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_on_ids_input_with_del_without_ids_shows_list(
@@ -176,8 +176,7 @@ class TestOnIdsInput:
             await on_ids_input(mock_message, mock_state)
 
             mock_state.clear.assert_called_once()
-            call_args = mock_message.answer.call_args[0][0]
-            assert "прервана" in call_args
+            mock_message.answer.assert_not_called()
 
 
 class TestShowDeleteConfirm:
