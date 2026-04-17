@@ -414,3 +414,58 @@ class TestProcessPhoto:
 
         call_args = mock_message.answer.call_args[0][0]
         assert "только первое" in call_args
+
+    @pytest.mark.asyncio
+    async def test_process_photo_clears_state(
+        self, mock_message, mock_state, mock_add_note, mock_add_note_image
+    ):
+        mock_photo1 = MagicMock()
+        mock_photo1.file_id = "small_file_id"
+        mock_photo2 = MagicMock()
+        mock_photo2.file_id = "large_file_id"
+        mock_message.photo = [mock_photo2, mock_photo1]
+        mock_message.caption = None
+
+        await _process_photo(mock_message, mock_state)
+
+        mock_state.clear.assert_called_once()
+
+
+class TestAddNoteWithArgsText:
+    @pytest.mark.asyncio
+    async def test_add_note_content_uses_saved_args_text_for_photo(
+        self, mock_message, mock_state, mock_add_note, mock_add_note_image
+    ):
+        mock_state.get_data = AsyncMock(return_value={"args_text": "saved text"})
+        mock_photo1 = MagicMock()
+        mock_photo1.file_id = "small_file_id"
+        mock_photo2 = MagicMock()
+        mock_photo2.file_id = "large_file_id"
+        mock_message.photo = [mock_photo2, mock_photo1]
+        mock_message.text = None
+
+        await add_note_content(mock_message, mock_state)
+
+        mock_add_note.assert_called_once_with("saved text")
+
+    @pytest.mark.asyncio
+    async def test_add_note_content_uses_saved_args_text_for_text(
+        self, mock_message, mock_state, mock_add_note
+    ):
+        mock_state.get_data = AsyncMock(return_value={"args_text": "saved text"})
+        mock_message.text = "user input"
+
+        await add_note_content(mock_message, mock_state)
+
+        mock_add_note.assert_called_once_with("saved text")
+
+    @pytest.mark.asyncio
+    async def test_add_note_content_user_text_overrides_when_args_empty(
+        self, mock_message, mock_state, mock_add_note
+    ):
+        mock_state.get_data = AsyncMock(return_value={"args_text": ""})
+        mock_message.text = "user input"
+
+        await add_note_content(mock_message, mock_state)
+
+        mock_add_note.assert_called_once_with("user input")
