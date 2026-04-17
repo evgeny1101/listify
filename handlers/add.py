@@ -61,6 +61,12 @@ async def cmd_add(message: Message, state: FSMContext):
     args_text = parts[1].strip() if len(parts) > 1 else ""
 
     if message.photo:
+        caption = message.caption.strip() if message.caption else ""
+        args_text = args_text or caption
+        if args_text.startswith("/add "):
+            args_text = args_text[5:]
+        if args_text.startswith("/"):
+            args_text = ""
         await _process_photo(message, state, from_command=True, args_text=args_text)
         return
 
@@ -72,6 +78,8 @@ async def cmd_add(message: Message, state: FSMContext):
         else:
             await message.answer("✅ Запись добавлена")
     else:
+        if args_text:
+            await state.update_data(args_text=args_text)
         await message.answer(
             "Введите текст или отправьте изображение:",
             reply_markup=get_cancel_keyboard(),
@@ -119,8 +127,9 @@ async def _process_photo(
     await message.answer("".join(parts))
 
 
-async def _process_text(message: Message, state: FSMContext):
-    text = message.text.strip() if message.text else ""
+async def _process_text(message: Message, state: FSMContext, args_text: str = ""):
+    user_text = message.text.strip() if message.text else ""
+    text = args_text or user_text
     if not text:
         await message.answer("⚠️ Введите текст заметки")
         return
@@ -140,10 +149,11 @@ async def _process_text(message: Message, state: FSMContext):
 
 @router.message(AddNote.waiting_for_content)
 async def add_note_content(message: Message, state: FSMContext):
+    data = await state.get_data()
+    args_text = data.get("args_text", "")
     text = message.text.strip() if message.text else ""
-    text_or_none = message.text
 
-    if text_or_none and text.startswith("/"):
+    if message.text and text.startswith("/"):
         await state.clear()
 
         parts = text.split(maxsplit=1)
@@ -180,10 +190,10 @@ async def add_note_content(message: Message, state: FSMContext):
         return
 
     if message.photo:
-        await _process_photo(message, state)
+        await _process_photo(message, state, args_text=args_text)
         return
 
-    await _process_text(message, state)
+    await _process_text(message, state, args_text)
 
 
 @router.callback_query(F.data == "cancel:add")
