@@ -1,13 +1,17 @@
 from __future__ import annotations
 
-from aiogram import Router
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from database import delete_note, delete_note_images, get_note_images, get_notes
-from keyboards import get_cancel_keyboard, get_multi_delete_keyboard
+from keyboards import (
+    get_cancel_keyboard,
+    get_delete_confirm_keyboard,
+    get_multi_delete_keyboard,
+)
 
 router = Router()
 
@@ -147,6 +151,14 @@ async def on_ids_input(message: Message, state: FSMContext):
     await show_delete_confirm(message, ids, state)
 
 
+@router.callback_query(F.data.startswith("delete:"))
+async def on_delete_click(callback: CallbackQuery):
+    index = int(callback.data.split(":")[1])
+    keyboard = get_delete_confirm_keyboard(index)
+    await callback.message.edit_reply_markup(reply_markup=keyboard)
+    await callback.answer()
+
+
 @router.callback_query()
 async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
     data = callback.data
@@ -170,9 +182,25 @@ async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
         else:
             text = "Записи уже удалены"
 
-        await callback.message.edit_text(text, reply_markup=None)
+        if callback.message.caption is not None:
+            await callback.bot.edit_message_caption(
+                chat_id=callback.message.chat.id,
+                message_id=callback.message.message_id,
+                caption=text,
+                reply_markup=None,
+            )
+        else:
+            await callback.message.edit_text(text, reply_markup=None)
     else:
-        await callback.message.edit_text("Удаление отменено", reply_markup=None)
+        if callback.message.caption is not None:
+            await callback.bot.edit_message_caption(
+                chat_id=callback.message.chat.id,
+                message_id=callback.message.message_id,
+                caption="Удаление отменено",
+                reply_markup=None,
+            )
+        else:
+            await callback.message.edit_text("Удаление отменено", reply_markup=None)
 
     await callback.answer()
     await state.clear()

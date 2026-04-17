@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.types import Message
+from aiogram.types import InlineKeyboardMarkup, Message
 
 from models.note import Note, NoteImage
 
@@ -58,6 +58,7 @@ async def send_note_with_image(
     text: str,
     images: list[NoteImage],
     use_large: bool = False,
+    reply_markup: InlineKeyboardMarkup | None = None,
 ) -> bool:
     header = f"📌 #{index} {NOTE_SEPARATOR * 3}"
     footer = NOTE_DELIMITER * len(header)
@@ -75,13 +76,14 @@ async def send_note_with_image(
             await message.answer_photo(
                 photo=image.file_id,
                 caption=full_text,
+                reply_markup=reply_markup,
             )
             return True
         except TelegramBadRequest:
             await message.answer(f"{full_text}\n⚠️ Изображение недоступно")
             return False
 
-    await message.answer(full_text)
+    await message.answer(full_text, reply_markup=reply_markup)
     return True
 
 
