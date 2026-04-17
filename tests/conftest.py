@@ -157,3 +157,9 @@ def mock_delete_note():
     with patch("handlers.delete.delete_note", new_callable=AsyncMock) as mock:
         mock.return_value = True
         yield mock
+
+
+@pytest.fixture
+def mock_delete_note_images():
+    with patch("handlers.delete.delete_note_images", new_callable=AsyncMock) as mock:
+        yield mock

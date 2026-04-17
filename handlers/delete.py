@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from database import delete_note, get_note_images, get_notes
+from database import delete_note, delete_note_images, get_note_images, get_notes
 from keyboards import get_cancel_keyboard, get_multi_delete_keyboard
 
 router = Router()
@@ -160,6 +160,8 @@ async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
         for idx in ids:
             if 1 <= idx <= len(notes):
                 note = notes[idx - 1]
+                if note.has_image:
+                    await delete_note_images(note.id)
                 await delete_note(note.id)
                 deleted.append(idx)
 

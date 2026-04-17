@@ -2,7 +2,13 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from handlers.delete import cmd_del, on_ids_input, parse_ids, show_delete_confirm
+from handlers.delete import (
+    cmd_del,
+    on_delete_confirm,
+    on_ids_input,
+    parse_ids,
+    show_delete_confirm,
+)
 
 
 class TestParseIds:
@@ -217,3 +223,45 @@ class TestShowDeleteConfirm:
             mock_message.answer.assert_called_with(
                 "Неверные ID. Введите существующие номера записей."
             )
+
+
+class TestDeleteNoteWithImages:
+    @pytest.mark.asyncio
+    async def test_delete_note_deletes_images_when_has_image(
+        self,
+        mock_callback_query,
+        mock_state,
+        sample_notes,
+        mock_delete_note,
+        mock_delete_note_images,
+    ):
+        sample_notes[0].has_image = True
+        mock_callback_query.data = "confirm:delete:1"
+
+        with patch("handlers.delete.get_notes", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = sample_notes
+
+            await on_delete_confirm(mock_callback_query, mock_state)
+
+            mock_delete_note_images.assert_called_once_with(sample_notes[0].id)
+            mock_delete_note.assert_called_once_with(sample_notes[0].id)
+
+    @pytest.mark.asyncio
+    async def test_delete_note_skips_image_delete_when_no_image(
+        self,
+        mock_callback_query,
+        mock_state,
+        sample_notes,
+        mock_delete_note,
+        mock_delete_note_images,
+    ):
+        sample_notes[0].has_image = False
+        mock_callback_query.data = "confirm:delete:1"
+
+        with patch("handlers.delete.get_notes", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = sample_notes
+
+            await on_delete_confirm(mock_callback_query, mock_state)
+
+            mock_delete_note_images.assert_not_called()
+            mock_delete_note.assert_called_once_with(sample_notes[0].id)
