@@ -125,6 +125,7 @@ async def _process_photo(
         parts.append("✅ Изображение добавлено")
 
     await message.answer("".join(parts))
+    await state.clear()
 
 
 async def _process_text(message: Message, state: FSMContext, args_text: str = ""):
