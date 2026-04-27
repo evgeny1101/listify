@@ -53,6 +53,13 @@ async def get_notes() -> list[Note]:
             ]
 
 
+async def get_notes_count() -> int:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT COUNT(*) FROM notes") as cursor:
+            row = await cursor.fetchone()
+            return row[0] if row else 0
+
+
 async def get_note(note_id: int) -> Note | None:
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row

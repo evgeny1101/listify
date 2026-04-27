@@ -12,6 +12,7 @@ async def main():
     from middlewares.auto_logging import AutoLoggingMiddleware
     from middlewares.fsm_interrupter import FSMInterrupterMiddleware
 
+    from .notifications import start_scheduler
     from .run import bot, dp
 
     # Middleware order: AccessCheck -> FSMInterrupter -> AutoLogging
@@ -28,6 +29,8 @@ async def main():
     from database import init_db
 
     await init_db()
+
+    start_scheduler()
 
     await bot.set_my_commands(commands)
 

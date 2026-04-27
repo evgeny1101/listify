@@ -6,6 +6,7 @@ from .db import (
     get_note,
     get_note_images,
     get_notes,
+    get_notes_count,
     init_db,
     update_note,
 )
@@ -18,6 +19,7 @@ __all__ = [
     "get_note",
     "get_note_images",
     "get_notes",
+    "get_notes_count",
     "init_db",
     "update_note",
 ]

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-04-27
+
+### Added
+- Ежедневные уведомления в 17:00 (если есть заметки)
+- Переменная `NOTIFICATION_TIME` в `.env` для настройки времени
+
+---
+
 ## [1.2.0] - 2026-04-18
 
 ### Added

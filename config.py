@@ -2,6 +2,7 @@ from os import getenv
 
 BOT_TOKEN: str | None = getenv("BOT_TOKEN")
 DB_PATH: str = "listify.db"
+NOTIFICATION_TIME: str | None = getenv("NOTIFICATION_TIME")
 
 # Parse allowed users from comma-separated string
 ALLOWED_USERS_STR: str = getenv("ALLOWED_USERS", "")
