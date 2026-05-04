@@ -78,8 +78,6 @@ async def cmd_add(message: Message, state: FSMContext):
         else:
             await message.answer("✅ Запись добавлена")
     else:
-        if args_text:
-            await state.update_data(args_text=args_text)
         await message.answer(
             "Введите текст или отправьте изображение:",
             reply_markup=get_cancel_keyboard(),

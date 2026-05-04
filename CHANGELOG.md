@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2026-05-04
+
+### Fixed
+- При редактировании фото `edited_at` не записывался
+- Превью заметки при редактировании без времени
+- Пустой текст при редактировании мог очистить заметку
+- `DEFAULT_TZ_OFFSET=abc` в `.env` ронял бот при старте
+
+### Changed
+- Версионирование миграций через `PRAGMA user_version` вместо try/except
+- `add_note()` возвращает `0` вместо `None` (безопасный fallback)
+
+### Removed
+- Мёртвый код `if args_text` в `/add` без аргументов
+
+---
+
 ## [1.4.0] - 2026-05-04
 
 ### Added

@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
+from config import DEFAULT_TZ_OFFSET
 from database import add_note_image, get_note_images, get_notes, update_note
 from handlers.add import (
     get_photo_file_ids,
@@ -34,7 +35,15 @@ async def send_current_note(message: Message, note_index: int) -> None:
 
     from bot.formatters import send_note_short_with_image
 
-    await send_note_short_with_image(message, note_index, note.text, images)
+    await send_note_short_with_image(
+        message,
+        note_index,
+        note.text,
+        images,
+        created_at=note.created_at,
+        edited_at=note.edited_at,
+        offset=DEFAULT_TZ_OFFSET,
+    )
 
     await message.answer("Введите новый текст или отправьте изображение:")
 
@@ -117,7 +126,11 @@ async def process_edit_text(message: Message, state: FSMContext, new_text: str) 
     data = await state.get_data()
     note_db_id = data["note_db_id"]
 
-    new_text, truncated = truncate_text(new_text) if new_text else ("", False)
+    if not new_text:
+        await message.answer("⚠️ Введите текст заметки")
+        return
+
+    new_text, truncated = truncate_text(new_text)
 
     await update_note(note_db_id, new_text, edited_at=message.date.isoformat())
 
@@ -156,7 +169,11 @@ async def process_edit_photo(
     text = new_text or caption
     text, truncated = truncate_text(text) if text else ("", False)
 
-    await update_note(note_db_id, text if text else "📷 Изображение")
+    await update_note(
+        note_db_id,
+        text if text else "📷 Изображение",
+        edited_at=message.date.isoformat(),
+    )
 
     await add_note_image(note_db_id, "small", small_id)
     await add_note_image(note_db_id, "large", large_id)

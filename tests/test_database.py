@@ -5,16 +5,82 @@ import pytest
 from database.db import add_note, delete_note, get_note, get_notes, init_db, update_note
 
 
+class _FakeCursor:
+    def __init__(self, version: int = 1, columns: list[str] | None = None):
+        self._version = version
+        self._columns = columns
+
+    async def fetchone(self):
+        return (self._version,)
+
+    async def fetchall(self):
+        return [(i, col) for i, col in enumerate(self._columns or [])]
+
+
 class TestInitDb:
+    def _build_execute_mock(
+        self, version: int = 1, table_info_cols: list[str] | None = None
+    ):
+        sql_log: list[str] = []
+
+        async def fake_execute(sql, *args):
+            sql_log.append(sql)
+            if "PRAGMA user_version" in sql and "=" not in sql:
+                return _FakeCursor(version=version)
+            if "PRAGMA table_info" in sql:
+                return _FakeCursor(columns=table_info_cols or [])
+            return _FakeCursor(version=version)
+
+        return fake_execute, sql_log
+
+    def _build_connection(
+        self, version: int = 1, table_info_cols: list[str] | None = None
+    ):
+        mock_connection = AsyncMock()
+        execute_mock, sql_log = self._build_execute_mock(
+            version=version, table_info_cols=table_info_cols
+        )
+        mock_connection.execute = execute_mock
+        mock_connection.__aenter__.return_value = mock_connection
+        mock_connection.__aexit__.return_value = None
+        return mock_connection, sql_log
+
     @pytest.mark.asyncio
     async def test_init_db_creates_table(self):
         with patch("database.db.aiosqlite") as mock_aiosqlite:
-            mock_connection = AsyncMock()
+            mock_connection, _ = self._build_connection(version=1)
             mock_aiosqlite.connect.return_value = mock_connection
 
             await init_db()
 
             mock_aiosqlite.connect.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_init_db_runs_migration_when_version_zero(self):
+        with patch("database.db.aiosqlite") as mock_aiosqlite:
+            mock_connection, sql_log = self._build_connection(
+                version=0, table_info_cols=["id", "text", "created_at"]
+            )
+            mock_aiosqlite.connect.return_value = mock_connection
+
+            await init_db()
+
+            assert "ALTER TABLE notes ADD COLUMN edited_at TEXT" in sql_log
+            assert "PRAGMA user_version = 1" in sql_log
+
+    @pytest.mark.asyncio
+    async def test_init_db_skips_migration_when_column_exists(self):
+        with patch("database.db.aiosqlite") as mock_aiosqlite:
+            mock_connection, sql_log = self._build_connection(
+                version=0,
+                table_info_cols=["id", "text", "created_at", "edited_at"],
+            )
+            mock_aiosqlite.connect.return_value = mock_connection
+
+            await init_db()
+
+            assert "ALTER TABLE" not in "".join(sql_log)
+            assert "PRAGMA user_version = 1" in sql_log
 
 
 class TestAddNote:

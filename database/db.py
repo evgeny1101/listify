@@ -17,10 +17,6 @@ async def init_db() -> None:
                 edited_at TEXT
             )
         """)
-        try:
-            await db.execute("ALTER TABLE notes ADD COLUMN edited_at TEXT")
-        except Exception:
-            pass
         await db.execute("""
             CREATE TABLE IF NOT EXISTS note_images (
                 note_id INTEGER,
@@ -30,6 +26,19 @@ async def init_db() -> None:
                 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
             )
         """)
+        await db.commit()
+
+        cursor = await db.execute("PRAGMA user_version")
+        row = await cursor.fetchone()
+        version = row[0]
+
+        if version < 1:
+            cursor = await db.execute("PRAGMA table_info(notes)")
+            columns = {r[1] for r in await cursor.fetchall()}
+            if "edited_at" not in columns:
+                await db.execute("ALTER TABLE notes ADD COLUMN edited_at TEXT")
+            await db.execute("PRAGMA user_version = 1")
+
         await db.commit()
 
 
@@ -42,7 +51,7 @@ async def add_note(text: str, created_at: str | None = None) -> int:
             (text, created_at),
         )
         await db.commit()
-        return cursor.lastrowid
+        return cursor.lastrowid or 0
 
 
 async def get_notes() -> list[Note]:
