@@ -72,7 +72,7 @@ async def cmd_add(message: Message, state: FSMContext):
 
     if args_text:
         args_text, truncated = truncate_text(args_text)
-        await add_note(args_text)
+        await add_note(args_text, created_at=message.date.isoformat())
         if truncated:
             await message.answer("⚠️ Запись добавлена (обрезано до 200 символов)")
         else:
@@ -108,7 +108,11 @@ async def _process_photo(
     text = args_text or caption
     text, truncated = truncate_text(text) if text else ("", False)
 
-    note_id = await add_note(text) if text else await add_note("📷 Изображение")
+    note_id = (
+        await add_note(text, created_at=message.date.isoformat())
+        if text
+        else await add_note("📷 Изображение", created_at=message.date.isoformat())
+    )
 
     await add_note_image(note_id, "small", small_id)
     await add_note_image(note_id, "large", large_id)
@@ -140,7 +144,7 @@ async def _process_text(message: Message, state: FSMContext, args_text: str = ""
         return
 
     text, truncated = truncate_text(text)
-    await add_note(text)
+    await add_note(text, created_at=message.date.isoformat())
     if truncated:
         await message.answer("⚠️ Запись добавлена (обрезано до 200 символов)")
     else:

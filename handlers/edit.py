@@ -119,7 +119,7 @@ async def process_edit_text(message: Message, state: FSMContext, new_text: str) 
 
     new_text, truncated = truncate_text(new_text) if new_text else ("", False)
 
-    await update_note(note_db_id, new_text)
+    await update_note(note_db_id, new_text, edited_at=message.date.isoformat())
 
     parts = []
     if truncated:

@@ -1,7 +1,7 @@
 services:
   bot:
     container_name: listify
-    image: ghcr.io/evgeny1101/listify:v1.3.0
+    image: ghcr.io/evgeny1101/listify:v1.4.0
     restart: unless-stopped
     volumes:
       - ./listify.db:/app/listify.db
@@ -9,6 +9,7 @@ services:
       - BOT_TOKEN=${BOT_TOKEN}
       - ALLOWED_USERS=${ALLOWED_USERS}
       - NOTIFICATION_TIME=${NOTIFICATION_TIME:-}
+      - DEFAULT_TZ_OFFSET=${DEFAULT_TZ_OFFSET:-3}
     logging:
       driver: "json-file"
       options:

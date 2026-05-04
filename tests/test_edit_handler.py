@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -136,11 +136,15 @@ class TestEditNoteId:
             mock_message.answer.assert_called_once_with("Запись не найдена")
 
     @pytest.mark.asyncio
-    async def test_edit_note_id_empty_shows_error(self, mock_message, mock_state):
+    async def test_edit_note_id_empty_shows_error(
+        self, mock_message, mock_state, sample_notes
+    ):
         mock_message.text = ""
         mock_message.photo = None
 
-        await edit_note_id(mock_message, mock_state)
+        with patch("handlers.edit.get_notes", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = sample_notes
+            await edit_note_id(mock_message, mock_state)
 
         mock_message.answer.assert_called_once_with("Введите ID записи")
 
@@ -188,7 +192,7 @@ class TestEditNoteContent:
             ) as mock_update:
                 await edit_note_content(mock_message, mock_state)
 
-                mock_update.assert_called_once_with(1, "Updated text")
+                mock_update.assert_called_once_with(1, "Updated text", edited_at=ANY)
                 mock_state.clear.assert_called_once()
                 mock_message.answer.assert_called()
 

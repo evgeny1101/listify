@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 
 from bot.formatters import send_note_with_image
+from config import DEFAULT_TZ_OFFSET
 from database import get_note_images, get_notes
 from keyboards import get_delete_button
 
@@ -23,11 +24,21 @@ async def cmd_list(message: Message):
         images = await get_note_images(note.id) if note.has_image else []
         keyboard = get_delete_button(i)
 
+        kwargs = {
+            "message": message,
+            "index": i,
+            "text": note.text,
+            "images": images,
+            "reply_markup": keyboard,
+            "created_at": note.created_at,
+            "edited_at": note.edited_at,
+            "offset": DEFAULT_TZ_OFFSET,
+        }
+
         if images:
-            await send_note_with_image(
-                message, i, note.text, images, use_large=True, reply_markup=keyboard
-            )
+            kwargs["use_large"] = True
         else:
-            await send_note_with_image(
-                message, i, note.text, [], use_large=False, reply_markup=keyboard
-            )
+            kwargs["images"] = []
+            kwargs["use_large"] = False
+
+        await send_note_with_image(**kwargs)

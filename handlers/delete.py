@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
+from config import DEFAULT_TZ_OFFSET
 from database import delete_note, delete_note_images, get_note_images, get_notes
 from keyboards import (
     get_cancel_keyboard,
@@ -79,7 +80,15 @@ async def show_delete_confirm(
         if 1 <= idx <= len(notes):
             note = notes[idx - 1]
             images = await get_note_images(note.id) if note.has_image else []
-            await send_note_short_with_image(message, idx, note.text, images)
+            await send_note_short_with_image(
+                message,
+                idx,
+                note.text,
+                images,
+                created_at=note.created_at,
+                edited_at=note.edited_at,
+                offset=DEFAULT_TZ_OFFSET,
+            )
 
     text = "Удалить записи #" + ", ".join(map(str, valid_ids)) + "?"
     await message.answer(text, reply_markup=get_multi_delete_keyboard(valid_ids))

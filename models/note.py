@@ -18,6 +18,9 @@ class Note:
     has_image: bool = False
     """Whether note has attached image(s)."""
 
+    edited_at: str | None = None
+    """ISO 8601 timestamp of last edit, or None if never edited."""
+
 
 @dataclass(slots=True)
 class NoteImage:

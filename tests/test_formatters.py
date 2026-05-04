@@ -2,7 +2,67 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from bot.formatters import format_note_full, format_note_short, send_notes_in_chunks
+from bot.formatters import (
+    _build_note_body,
+    format_note_full,
+    format_note_short,
+    format_timestamp,
+    send_notes_in_chunks,
+)
+
+
+class TestFormatTimestamp:
+    def test_format_timestamp_returns_formatted_with_offset(self):
+        result = format_timestamp("2024-01-01T10:00:00+00:00", 3)
+
+        assert result == "13:00 01.01"
+
+    def test_format_timestamp_none_returns_empty(self):
+        result = format_timestamp(None, 3)
+
+        assert result == ""
+
+    def test_format_timestamp_negative_offset(self):
+        result = format_timestamp("2024-01-01T10:00:00+00:00", -5)
+
+        assert result == "05:00 01.01"
+
+    def test_format_timestamp_zero_offset(self):
+        result = format_timestamp("2024-01-01T10:00:00+00:00", 0)
+
+        assert result == "10:00 01.01"
+
+
+class TestBuildNoteBody:
+    def test_with_timestamp(self):
+        result = _build_note_body(
+            1, "Test", created_at="2024-01-01T10:00:00+00:00", offset=3
+        )
+
+        assert "📌 #1" in result
+        assert "Test" in result
+        assert "───" in result
+        assert "13:00 01.01" in result
+
+    def test_with_edited_at(self):
+        result = _build_note_body(
+            1,
+            "Test",
+            created_at="2024-01-01T10:00:00+00:00",
+            edited_at="2024-01-02T14:00:00+00:00",
+            offset=3,
+        )
+
+        assert "17:00 02.01" in result
+        assert "13:00 01.01" not in result
+
+    def test_without_timestamp(self):
+        result = _build_note_body(1, "Test")
+
+        assert "📌 #1" in result
+        assert "Test" in result
+        assert "───" in result
+        assert ":" not in result.split("\n")[-1]
 
 
 class TestFormatNoteFull:
@@ -13,6 +73,13 @@ class TestFormatNoteFull:
         assert "Test note" in result
         assert "═══" in result
         assert "───" in result
+
+    def test_format_note_full_with_timestamp(self):
+        result = format_note_full(
+            1, "Test", created_at="2024-01-01T10:00:00+00:00", offset=3
+        )
+
+        assert "13:00 01.01" in result
 
     def test_format_note_full_different_index(self):
         result = format_note_full(5, "Some text")
@@ -41,6 +108,13 @@ class TestFormatNoteShort:
         result = format_note_short(1, text, limit=10)
 
         assert "..." in result
+
+    def test_format_note_short_with_timestamp(self):
+        result = format_note_short(
+            1, "Test", created_at="2024-01-01T10:00:00+00:00", offset=3
+        )
+
+        assert "13:00 01.01" in result
 
 
 class TestSendNotesInChunks:

@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -132,7 +132,7 @@ class TestCmdAdd:
 
         await cmd_add(mock_message, mock_state)
 
-        mock_add_note.assert_called_once_with("Test note")
+        mock_add_note.assert_called_once_with("Test note", created_at=ANY)
         mock_message.answer.assert_called()
         mock_state.set_state.assert_not_called()
 
@@ -170,7 +170,7 @@ class TestCmdAdd:
 
         await cmd_add(mock_message, mock_state)
 
-        mock_add_note.assert_called_once_with("Spaced note")
+        mock_add_note.assert_called_once_with("Spaced note", created_at=ANY)
 
     @pytest.mark.asyncio
     async def test_cmd_add_with_video_shows_error(self, mock_message, mock_state):
@@ -211,7 +211,7 @@ class TestAddNoteContent:
 
         await add_note_content(mock_message, mock_state)
 
-        mock_add_note.assert_called_once_with("New note")
+        mock_add_note.assert_called_once_with("New note", created_at=ANY)
         mock_state.clear.assert_called_once()
         mock_message.answer.assert_called()
 
@@ -253,7 +253,7 @@ class TestAddNoteContent:
 
         await add_note_content(mock_message, mock_state)
 
-        mock_add_note.assert_called_once_with("my new note")
+        mock_add_note.assert_called_once_with("my new note", created_at=ANY)
         mock_state.clear.assert_called_once()
         call_args = mock_message.answer.call_args[0][0]
         assert "добавлена" in call_args
@@ -379,7 +379,7 @@ class TestProcessPhoto:
 
         await _process_photo(mock_message, mock_state)
 
-        mock_add_note.assert_called_once_with("My caption")
+        mock_add_note.assert_called_once_with("My caption", created_at=ANY)
         mock_add_note_image.assert_called()
 
     @pytest.mark.asyncio
@@ -395,7 +395,7 @@ class TestProcessPhoto:
 
         await _process_photo(mock_message, mock_state)
 
-        mock_add_note.assert_called_once_with("📷 Изображение")
+        mock_add_note.assert_called_once_with("📷 Изображение", created_at=ANY)
 
     @pytest.mark.asyncio
     async def test_process_photo_warns_multiple_images(
@@ -446,7 +446,7 @@ class TestAddNoteWithArgsText:
 
         await add_note_content(mock_message, mock_state)
 
-        mock_add_note.assert_called_once_with("saved text")
+        mock_add_note.assert_called_once_with("saved text", created_at=ANY)
 
     @pytest.mark.asyncio
     async def test_add_note_content_uses_saved_args_text_for_text(
@@ -457,7 +457,7 @@ class TestAddNoteWithArgsText:
 
         await add_note_content(mock_message, mock_state)
 
-        mock_add_note.assert_called_once_with("saved text")
+        mock_add_note.assert_called_once_with("saved text", created_at=ANY)
 
     @pytest.mark.asyncio
     async def test_add_note_content_user_text_overrides_when_args_empty(
@@ -468,4 +468,4 @@ class TestAddNoteWithArgsText:
 
         await add_note_content(mock_message, mock_state)
 
-        mock_add_note.assert_called_once_with("user input")
+        mock_add_note.assert_called_once_with("user input", created_at=ANY)

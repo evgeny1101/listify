@@ -13,9 +13,14 @@ async def init_db() -> None:
             CREATE TABLE IF NOT EXISTS notes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 text TEXT NOT NULL,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                edited_at TEXT
             )
         """)
+        try:
+            await db.execute("ALTER TABLE notes ADD COLUMN edited_at TEXT")
+        except Exception:
+            pass
         await db.execute("""
             CREATE TABLE IF NOT EXISTS note_images (
                 note_id INTEGER,
@@ -28,11 +33,13 @@ async def init_db() -> None:
         await db.commit()
 
 
-async def add_note(text: str) -> int:
+async def add_note(text: str, created_at: str | None = None) -> int:
+    if created_at is None:
+        created_at = datetime.datetime.now(datetime.UTC).isoformat()
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute(
             "INSERT INTO notes (text, created_at) VALUES (?, ?)",
-            (text, datetime.datetime.now(datetime.UTC).isoformat()),
+            (text, created_at),
         )
         await db.commit()
         return cursor.lastrowid
@@ -42,13 +49,19 @@ async def get_notes() -> list[Note]:
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
         async with db.execute("""
-            SELECT n.id, n.text, n.created_at,
+            SELECT n.id, n.text, n.created_at, n.edited_at,
                    EXISTS(SELECT 1 FROM note_images WHERE note_id = n.id) as has_image
             FROM notes n ORDER BY n.id
         """) as cursor:
             rows = await cursor.fetchall()
             return [
-                Note(row["id"], row["text"], row["created_at"], bool(row["has_image"]))
+                Note(
+                    row["id"],
+                    row["text"],
+                    row["created_at"],
+                    bool(row["has_image"]),
+                    row["edited_at"],
+                )
                 for row in rows
             ]
 
@@ -65,7 +78,7 @@ async def get_note(note_id: int) -> Note | None:
         db.row_factory = aiosqlite.Row
         async with db.execute(
             """
-            SELECT n.id, n.text, n.created_at,
+            SELECT n.id, n.text, n.created_at, n.edited_at,
                    EXISTS(SELECT 1 FROM note_images WHERE note_id = n.id) as has_image
             FROM notes n WHERE n.id = ?
         """,
@@ -74,7 +87,11 @@ async def get_note(note_id: int) -> Note | None:
             row = await cursor.fetchone()
             if row:
                 return Note(
-                    row["id"], row["text"], row["created_at"], bool(row["has_image"])
+                    row["id"],
+                    row["text"],
+                    row["created_at"],
+                    bool(row["has_image"]),
+                    row["edited_at"],
                 )
             return None
 
@@ -86,11 +103,19 @@ async def delete_note(note_id: int) -> bool:
         return cursor.rowcount > 0
 
 
-async def update_note(note_id: int, new_text: str) -> bool:
+async def update_note(
+    note_id: int, new_text: str, edited_at: str | None = None
+) -> bool:
     async with aiosqlite.connect(DB_PATH) as db:
-        cursor = await db.execute(
-            "UPDATE notes SET text = ? WHERE id = ?", (new_text, note_id)
-        )
+        if edited_at is not None:
+            cursor = await db.execute(
+                "UPDATE notes SET text = ?, edited_at = ? WHERE id = ?",
+                (new_text, edited_at, note_id),
+            )
+        else:
+            cursor = await db.execute(
+                "UPDATE notes SET text = ? WHERE id = ?", (new_text, note_id)
+            )
         await db.commit()
         return cursor.rowcount > 0
 

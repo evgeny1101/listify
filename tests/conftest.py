@@ -1,3 +1,4 @@
+import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -41,6 +42,7 @@ def mock_message():
     message.sticker = None
     message.animation = None
     message.caption = None
+    message.date = datetime.datetime(2026, 5, 4, 12, 0, 0, tzinfo=datetime.UTC)
     message.answer = AsyncMock()
     message.from_user = MagicMock()
     message.from_user.id = 123
@@ -79,8 +81,9 @@ def sample_notes():
             {
                 "id": 1,
                 "text": "First note",
-                "created_at": "2024-01-01T10:00:00",
+                "created_at": "2024-01-01T10:00:00+00:00",
                 "has_image": False,
+                "edited_at": None,
             },
         )(),
         type(
@@ -89,8 +92,9 @@ def sample_notes():
             {
                 "id": 2,
                 "text": "Second note",
-                "created_at": "2024-01-02T10:00:00",
+                "created_at": "2024-01-02T10:00:00+00:00",
                 "has_image": False,
+                "edited_at": None,
             },
         )(),
         type(
@@ -99,8 +103,9 @@ def sample_notes():
             {
                 "id": 3,
                 "text": "Third note",
-                "created_at": "2024-01-03T10:00:00",
+                "created_at": "2024-01-03T10:00:00+00:00",
                 "has_image": False,
+                "edited_at": None,
             },
         )(),
     ]
@@ -115,8 +120,9 @@ def sample_notes_with_image():
             {
                 "id": 1,
                 "text": "Note with image",
-                "created_at": "2024-01-01T10:00:00",
+                "created_at": "2024-01-01T10:00:00+00:00",
                 "has_image": True,
+                "edited_at": None,
             },
         )(),
         type(
@@ -125,8 +131,9 @@ def sample_notes_with_image():
             {
                 "id": 2,
                 "text": "Note without image",
-                "created_at": "2024-01-02T10:00:00",
+                "created_at": "2024-01-02T10:00:00+00:00",
                 "has_image": False,
+                "edited_at": None,
             },
         )(),
     ]
