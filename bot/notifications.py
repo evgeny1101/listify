@@ -21,7 +21,7 @@ async def send_notifications() -> None:
             try:
                 await bot_instance.send_message(
                     user_id,
-                    f"📝 У вас {notes_count} заметок. Нажмите /ls чтобы посмотреть.",
+                    "📝 У вас есть заметки. Посмотреть: /ls",
                 )
                 logger.info(f"Notification sent to user {user_id}")
             except Exception as e:

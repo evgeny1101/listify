@@ -33,7 +33,7 @@ pip install -r requirements-dev.txt
 
 - Линтинг: использовать скил `/lint` (включает typecheck)
 - При добавлении новых функций: всегда добавлять аннотации типов
-- Тесты: использовать скил `/test` (85 тестов, покрытие database, handlers, formatters, middlewares)
+- Тесты: использовать скил `/test` (покрытие database, handlers, formatters, middlewares)
 - При внесении изменений: сначала добавить/обновить тесты, затем запустить `/test`
 - Запуск тестов вручную: `source venv/bin/activate && python -m pytest tests/ -v`
 - Сброс БД: `rm listify.db`

@@ -72,10 +72,10 @@ class TestSendNotifications:
 
             assert mock_bot.send_message.call_count == 2
             mock_bot.send_message.assert_any_call(
-                123, "📝 У вас 3 заметок. Нажмите /ls чтобы посмотреть."
+                123, "📝 У вас есть заметки. Посмотреть: /ls"
             )
             mock_bot.send_message.assert_any_call(
-                456, "📝 У вас 3 заметок. Нажмите /ls чтобы посмотреть."
+                456, "📝 У вас есть заметки. Посмотреть: /ls"
             )
 
     @pytest.mark.asyncio
