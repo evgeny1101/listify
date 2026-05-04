@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.2] - 2026-05-04
+
+### Changed
+- Текст ежедневного уведомления стал более дружелюбным
+- Обновлена документация (убрано устаревшее число тестов из AGENTS.md)
+
+---
+
 ## [1.4.1] - 2026-05-04
 
 ### Fixed
