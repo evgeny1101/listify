@@ -16,6 +16,7 @@ from database import (
 )
 from keyboards import (
     get_cancel_keyboard,
+    get_delete_button,
     get_delete_confirm_keyboard,
     get_multi_delete_keyboard,
 )
@@ -206,15 +207,18 @@ async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
         else:
             await callback.message.edit_text(text, reply_markup=None)
     else:
-        if callback.message.caption is not None:
-            await callback.bot.edit_message_caption(
-                chat_id=callback.message.chat.id,
-                message_id=callback.message.message_id,
-                caption="Удаление отменено",
-                reply_markup=None,
-            )
+        if len(note_ids) == 1:
+            note = await get_note(note_ids[0])
+            if note:
+                keyboard = get_delete_button(note_ids[0])
+            else:
+                await callback.message.edit_text("Запись уже удалена", reply_markup=None)
+                await callback.answer()
+                await state.clear()
+                return
         else:
-            await callback.message.edit_text("Удаление отменено", reply_markup=None)
+            keyboard = None
+        await callback.message.edit_reply_markup(reply_markup=keyboard)
 
     await callback.answer()
     await state.clear()
