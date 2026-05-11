@@ -410,7 +410,7 @@ class TestProcessPhoto:
         mock_message.photo = [mock_photo3, mock_photo2, mock_photo1]
         mock_message.caption = None
 
-        await _process_photo(mock_message, mock_state, from_command=True)
+        await _process_photo(mock_message, mock_state)
 
         call_args = mock_message.answer.call_args[0][0]
         assert "только первое" in call_args

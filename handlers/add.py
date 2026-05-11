@@ -67,7 +67,7 @@ async def cmd_add(message: Message, state: FSMContext):
             args_text = args_text[5:]
         if args_text.startswith("/"):
             args_text = ""
-        await _process_photo(message, state, from_command=True, args_text=args_text)
+        await _process_photo(message, state, args_text=args_text)
         return
 
     if args_text:
@@ -85,9 +85,7 @@ async def cmd_add(message: Message, state: FSMContext):
         await state.set_state(AddNote.waiting_for_content)
 
 
-async def _process_photo(
-    message: Message, state: FSMContext, from_command: bool = False, args_text: str = ""
-):
+async def _process_photo(message: Message, state: FSMContext, args_text: str = ""):
     large_and_small = get_photo_file_ids(message)
 
     if not large_and_small:
