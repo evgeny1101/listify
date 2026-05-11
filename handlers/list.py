@@ -22,11 +22,12 @@ async def cmd_list(message: Message):
 
     for i, note in enumerate(notes, 1):
         images = await get_note_images(note.id) if note.has_image else []
-        keyboard = get_delete_button(i)
+        keyboard = get_delete_button(note.id)
 
         kwargs = {
             "message": message,
             "index": i,
+            "note_id": note.id,
             "text": note.text,
             "images": images,
             "reply_markup": keyboard,

@@ -5,22 +5,22 @@ def _cancel_button(target: str) -> InlineKeyboardButton:
     return InlineKeyboardButton(text="Отмена", callback_data=f"cancel:delete:{target}")
 
 
-def get_delete_button(index: int) -> InlineKeyboardMarkup:
+def get_delete_button(note_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🗑️ Удалить", callback_data=f"delete:{index}")]
+            [InlineKeyboardButton(text="🗑️ Удалить", callback_data=f"delete:{note_id}")]
         ]
     )
 
 
-def get_delete_confirm_keyboard(index: int) -> InlineKeyboardMarkup:
+def get_delete_confirm_keyboard(note_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Да, удалить", callback_data=f"confirm:delete:{index}"
+                    text="Да, удалить", callback_data=f"confirm:delete:{note_id}"
                 ),
-                _cancel_button(str(index)),
+                _cancel_button(str(note_id)),
             ]
         ]
     )

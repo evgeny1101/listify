@@ -7,9 +7,16 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from config import DEFAULT_TZ_OFFSET
-from database import delete_note, delete_note_images, get_note_images, get_notes
+from database import (
+    delete_note,
+    delete_note_images,
+    get_note,
+    get_note_images,
+    get_notes,
+)
 from keyboards import (
     get_cancel_keyboard,
+    get_delete_button,
     get_delete_confirm_keyboard,
     get_multi_delete_keyboard,
 )
@@ -162,8 +169,8 @@ async def on_ids_input(message: Message, state: FSMContext):
 
 @router.callback_query(F.data.startswith("delete:"))
 async def on_delete_click(callback: CallbackQuery):
-    index = int(callback.data.split(":")[1])
-    keyboard = get_delete_confirm_keyboard(index)
+    note_id = int(callback.data.split(":")[1])
+    keyboard = get_delete_confirm_keyboard(note_id)
     await callback.message.edit_reply_markup(reply_markup=keyboard)
     await callback.answer()
 
@@ -171,23 +178,22 @@ async def on_delete_click(callback: CallbackQuery):
 @router.callback_query()
 async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
     data = callback.data
-    action, _, ids_str = data.split(":")
-    ids = list(map(int, ids_str.split(",")))
+    action, _, note_ids_str = data.split(":")
+    note_ids = list(map(int, note_ids_str.split(",")))
 
     if action == "confirm":
-        notes = await get_notes()
         deleted = []
 
-        for idx in ids:
-            if 1 <= idx <= len(notes):
-                note = notes[idx - 1]
+        for note_id in note_ids:
+            note = await get_note(note_id)
+            if note:
                 if note.has_image:
-                    await delete_note_images(note.id)
-                await delete_note(note.id)
-                deleted.append(idx)
+                    await delete_note_images(note_id)
+                await delete_note(note_id)
+                deleted.append(note_id)
 
         if deleted:
-            text = "✅ Записи #" + ", ".join(map(str, deleted)) + " удалены"
+            text = "✅ Записи удалены"
         else:
             text = "Записи уже удалены"
 
@@ -201,15 +207,18 @@ async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
         else:
             await callback.message.edit_text(text, reply_markup=None)
     else:
-        if callback.message.caption is not None:
-            await callback.bot.edit_message_caption(
-                chat_id=callback.message.chat.id,
-                message_id=callback.message.message_id,
-                caption="Удаление отменено",
-                reply_markup=None,
-            )
+        if len(note_ids) == 1:
+            note = await get_note(note_ids[0])
+            if note:
+                keyboard = get_delete_button(note_ids[0])
+            else:
+                await callback.message.edit_text("Запись уже удалена", reply_markup=None)
+                await callback.answer()
+                await state.clear()
+                return
         else:
-            await callback.message.edit_text("Удаление отменено", reply_markup=None)
+            keyboard = None
+        await callback.message.edit_reply_markup(reply_markup=keyboard)
 
     await callback.answer()
     await state.clear()
