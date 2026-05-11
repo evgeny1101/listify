@@ -100,6 +100,8 @@ async def _process_photo(
         warning = ""
 
     small_id, large_id = large_and_small
+    if small_id is None:
+        small_id = large_id
     caption = message.caption.strip() if message.caption else ""
     if caption.startswith("/"):
         caption = ""

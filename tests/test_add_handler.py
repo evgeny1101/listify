@@ -430,6 +430,20 @@ class TestProcessPhoto:
 
         mock_state.clear.assert_called_once()
 
+    @pytest.mark.asyncio
+    async def test_process_photo_single_size_uses_same_file_id_for_small_and_large(
+        self, mock_message, mock_state, mock_add_note, mock_add_note_image
+    ):
+        mock_photo = MagicMock()
+        mock_photo.file_id = "single_id"
+        mock_message.photo = [mock_photo]
+        mock_message.caption = None
+
+        await _process_photo(mock_message, mock_state)
+
+        mock_add_note_image.assert_any_call(1, "small", "single_id")
+        mock_add_note_image.assert_any_call(1, "large", "single_id")
+
 
 class TestAddNoteWithArgsText:
     @pytest.mark.asyncio

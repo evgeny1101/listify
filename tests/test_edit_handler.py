@@ -251,6 +251,28 @@ class TestEditNoteContent:
                     assert mock_add_image.call_count == 2
 
     @pytest.mark.asyncio
+    async def test_edit_note_content_single_photo_uses_same_file_id_for_both_sizes(
+        self, mock_message, mock_state
+    ):
+        mock_photo = MagicMock()
+        mock_photo.file_id = "single_id"
+        mock_message.photo = [mock_photo]
+        mock_message.caption = "New caption"
+        mock_message.text = ""
+
+        mock_state.get_data = AsyncMock(return_value={"note_index": 1, "note_db_id": 1})
+
+        with patch("handlers.edit.get_notes", new_callable=AsyncMock):
+            with patch("handlers.edit.update_note", new_callable=AsyncMock):
+                with patch(
+                    "handlers.edit.add_note_image", new_callable=AsyncMock
+                ) as mock_add_image:
+                    await edit_note_content(mock_message, mock_state)
+
+                    mock_add_image.assert_any_call(1, "small", "single_id")
+                    mock_add_image.assert_any_call(1, "large", "single_id")
+
+    @pytest.mark.asyncio
     async def test_edit_note_content_intercepts_command_clears_state(
         self, mock_message, mock_state
     ):
