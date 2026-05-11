@@ -79,7 +79,8 @@ async def show_delete_confirm(
         await message.answer("Неверные ID. Введите существующие номера записей.")
         return
 
-    await state.update_data(ids=valid_ids)
+    note_ids = [notes[idx - 1].id for idx in valid_ids]
+    await state.update_data(ids=note_ids)
 
     from bot.formatters import send_note_short_with_image
 
@@ -98,7 +99,7 @@ async def show_delete_confirm(
             )
 
     text = "Удалить записи #" + ", ".join(map(str, valid_ids)) + "?"
-    await message.answer(text, reply_markup=get_multi_delete_keyboard(valid_ids))
+    await message.answer(text, reply_markup=get_multi_delete_keyboard(note_ids))
 
 
 @router.message(Command("del"))
@@ -212,7 +213,9 @@ async def on_delete_confirm(callback: CallbackQuery, state: FSMContext):
             if note:
                 keyboard = get_delete_button(note_ids[0])
             else:
-                await callback.message.edit_text("Запись уже удалена", reply_markup=None)
+                await callback.message.edit_text(
+                    "Запись уже удалена", reply_markup=None
+                )
                 await callback.answer()
                 await state.clear()
                 return

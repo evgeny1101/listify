@@ -27,7 +27,6 @@ async def cmd_list(message: Message):
         kwargs = {
             "message": message,
             "index": i,
-            "note_id": note.id,
             "text": note.text,
             "images": images,
             "reply_markup": keyboard,

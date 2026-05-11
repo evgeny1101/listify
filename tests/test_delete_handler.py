@@ -224,6 +224,24 @@ class TestShowDeleteConfirm:
                 "Неверные ID. Введите существующие номера записей."
             )
 
+    @pytest.mark.asyncio
+    async def test_show_delete_confirm_uses_note_ids_in_callback(
+        self, mock_message, mock_state, sample_notes
+    ):
+        sample_notes[1].id = 10
+
+        with patch("handlers.delete.get_notes", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = sample_notes
+
+            await show_delete_confirm(mock_message, [2], mock_state)
+
+            reply_markup = mock_message.answer.call_args_list[-1].kwargs["reply_markup"]
+            confirm_button = reply_markup.inline_keyboard[0][0]
+            cancel_button = reply_markup.inline_keyboard[0][1]
+
+            assert confirm_button.callback_data == "confirm:delete:10"
+            assert cancel_button.callback_data == "cancel:delete:10"
+
 
 class TestDeleteNoteWithImages:
     @pytest.mark.asyncio
@@ -238,8 +256,8 @@ class TestDeleteNoteWithImages:
         sample_notes[0].has_image = True
         mock_callback_query.data = "confirm:delete:1"
 
-        with patch("handlers.delete.get_notes", new_callable=AsyncMock) as mock_get:
-            mock_get.return_value = sample_notes
+        with patch("handlers.delete.get_note", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = sample_notes[0]
 
             await on_delete_confirm(mock_callback_query, mock_state)
 
@@ -258,10 +276,66 @@ class TestDeleteNoteWithImages:
         sample_notes[0].has_image = False
         mock_callback_query.data = "confirm:delete:1"
 
-        with patch("handlers.delete.get_notes", new_callable=AsyncMock) as mock_get:
-            mock_get.return_value = sample_notes
+        with patch("handlers.delete.get_note", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = sample_notes[0]
 
             await on_delete_confirm(mock_callback_query, mock_state)
 
             mock_delete_note_images.assert_not_called()
             mock_delete_note.assert_called_once_with(sample_notes[0].id)
+
+    @pytest.mark.asyncio
+    async def test_cancel_single_restores_delete_button(
+        self,
+        mock_callback_query,
+        mock_state,
+        sample_notes,
+    ):
+        mock_callback_query.data = "cancel:delete:1"
+        mock_callback_query.message.edit_reply_markup = AsyncMock()
+
+        with patch("handlers.delete.get_note", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = sample_notes[0]
+
+            await on_delete_confirm(mock_callback_query, mock_state)
+
+            assert mock_callback_query.message.edit_reply_markup.called
+            reply_markup = (
+                mock_callback_query.message.edit_reply_markup.call_args.kwargs[
+                    "reply_markup"
+                ]
+            )
+            button = reply_markup.inline_keyboard[0][0]
+            assert button.callback_data == "delete:1"
+
+    @pytest.mark.asyncio
+    async def test_cancel_single_for_deleted_note_shows_message(
+        self,
+        mock_callback_query,
+        mock_state,
+    ):
+        mock_callback_query.data = "cancel:delete:1"
+
+        with patch("handlers.delete.get_note", new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = None
+
+            await on_delete_confirm(mock_callback_query, mock_state)
+
+            mock_callback_query.message.edit_text.assert_called_with(
+                "Запись уже удалена", reply_markup=None
+            )
+
+    @pytest.mark.asyncio
+    async def test_cancel_multiple_removes_keyboard(
+        self,
+        mock_callback_query,
+        mock_state,
+    ):
+        mock_callback_query.data = "cancel:delete:1,2"
+        mock_callback_query.message.edit_reply_markup = AsyncMock()
+
+        await on_delete_confirm(mock_callback_query, mock_state)
+
+        mock_callback_query.message.edit_reply_markup.assert_called_with(
+            reply_markup=None
+        )
