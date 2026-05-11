@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.3] - 2026-05-11
+
+### Fixed
+- Исправлено удаление через `/del`: callback теперь использует `note_id` из БД, что корректно работает при несмежных ID
+- Исправлено падение `/ls` из-за лишнего аргумента `note_id` в вызове `send_note_with_image()`
+- Исправлен `IntegrityError` при добавлении/редактировании заметки с одним размером фото: для `small` используется fallback на `large` file_id
+
+### Changed
+- Удален неиспользуемый параметр `from_command` в `_process_photo()`
+
+---
+
 ## [1.4.2] - 2026-05-04
 
 ### Changed
